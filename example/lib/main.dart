@@ -162,7 +162,7 @@ class List extends StatelessWidget {
             //decoration: BoxDecoration(border: Border.all(color: Colors.orange,width: 1.0)),
             alignment: Alignment.center,
             height: 60.0,
-            child: Text("${tabKey} : List$i"),
+            child: Text("$tabKey : List$i"),
           );
         },
         itemCount: 100);

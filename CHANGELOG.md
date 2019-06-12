@@ -1,4 +1,4 @@
-## [0.1.6]
+## [0.2.0]
 
 *  add cacheExtent for extended page
 

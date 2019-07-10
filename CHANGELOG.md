@@ -1,3 +1,7 @@
+## [0.2.1]
+
+*  improve codes base on v1.7.8
+
 ## [0.2.0]
 
 *  add cacheExtent for extended page

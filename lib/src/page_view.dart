@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
@@ -25,6 +26,8 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// [PageController.initialPage], which determines which page is shown when the
 /// [ExtendedPageView] is first constructed, and the [PageController.viewportFraction],
 /// which determines the size of the pages as a fraction of the viewport size.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
 /// See also:
 ///
@@ -50,17 +53,12 @@ class ExtendedPageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    this.cacheExtent = 0,
     List<Widget> children = const <Widget>[],
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.cacheExtent = 0,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
         super(key: key);
-
-  /// cache page count
-  /// default is 0.
-  /// if cacheExtent is 1, it has two pages in cache
-  /// null is infinity, it will cache all pages
-  final int cacheExtent;
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -82,9 +80,10 @@ class ExtendedPageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    this.cacheExtent = 0,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.cacheExtent = 0,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
@@ -100,11 +99,18 @@ class ExtendedPageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    this.cacheExtent = 0,
     @required this.childrenDelegate,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.cacheExtent = 0,
   })  : assert(childrenDelegate != null),
         controller = controller ?? _defaultPageController,
         super(key: key);
+
+  /// cache page count
+  /// default is 0.
+  /// if cacheExtent is 1, it has two pages in cache
+  /// null is infinity, it will cache all pages
+  final int cacheExtent;
 
   /// The axis along which the page view scrolls.
   ///
@@ -154,6 +160,9 @@ class ExtendedPageView extends StatefulWidget {
   /// respectively.
   final SliverChildDelegate childrenDelegate;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   @override
   _ExtendedPageViewState createState() => _ExtendedPageViewState();
 }
@@ -185,7 +194,6 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
 
   @override
   Widget build(BuildContext context) {
-    // prePageView = context.ancestorWidgetOfExactType(_typeOf<PageView>());
     final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = widget.pageSnapping
         ? _kPagePhysics.applyTo(widget.physics)
@@ -206,6 +214,7 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         return false;
       },
       child: Scrollable(
+        dragStartBehavior: widget.dragStartBehavior,
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,

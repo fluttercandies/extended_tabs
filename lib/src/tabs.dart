@@ -5,15 +5,23 @@
 import 'dart:async';
 
 import 'package:extended_tabs/src/page_view.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 /// A page view that displays the widget which corresponds to the currently
-/// selected tab. Typically used in conjunction with a [TabBar].
+/// selected tab.
+///
+/// This widget is typically used in conjunction with a [TabBar].
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
+///
+/// The tab controller's [TabController.length] must equal the length of the
+/// [children] list and the length of the [TabBar.tabs] list.
+///
+/// To see a sample implementation, visit the [TabController] documentation.
 class ExtendedTabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
@@ -23,9 +31,11 @@ class ExtendedTabBarView extends StatefulWidget {
       @required this.children,
       this.controller,
       this.physics,
+      this.dragStartBehavior = DragStartBehavior.start,
       this.cacheExtent = 0,
       this.linkWithAncestor = true})
       : assert(children != null),
+        assert(dragStartBehavior != null),
         super(key: key);
 
   /// cache page count
@@ -46,6 +56,9 @@ class ExtendedTabBarView extends StatefulWidget {
   final TabController controller;
 
   /// One widget per tab.
+  ///
+  /// Its length must match the length of the [TabBar.tabs]
+  /// list, as well as the [controller]'s [TabController.length].
   final List<Widget> children;
 
   /// How the page view should respond to user input.
@@ -54,9 +67,13 @@ class ExtendedTabBarView extends StatefulWidget {
   /// user stops dragging the page view.
   ///
   /// The physics are modified to snap to page boundaries using
+  /// [PageScrollPhysics] prior to being used.
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _ExtendedTabBarViewState createState() => _ExtendedTabBarViewState();
@@ -70,8 +87,14 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   PageController _pageController;
   _ExtendedTabBarViewState _ancestor;
   List<Widget> _children;
+  List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
+
+  // If the TabBarView is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
 
   void _updateTabController() {
     final TabController newController =
@@ -86,9 +109,10 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
       }
       return true;
     }());
+
     if (newController == _controller) return;
 
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
     _controller = newController;
     if (_controller != null)
@@ -98,7 +122,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   @override
   void initState() {
     super.initState();
-    _children = widget.children;
+    _updateChildren();
   }
 
   @override
@@ -114,15 +138,21 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) _updateTabController();
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
-      _children = widget.children;
+      _updateChildren();
   }
 
   @override
   void dispose() {
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
+  }
+
+  void _updateChildren() {
+    _children = widget.children;
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
   }
 
   void _handleTabControllerAnimationTick() {
@@ -135,47 +165,6 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
     }
   }
 
-  ///Flutter official code
-//  Future<void> _warpToCurrentIndex() async {
-//    if (!mounted) return Future<void>.value();
-//
-//    if (_pageController.page == _currentIndex.toDouble())
-//      return Future<void>.value();
-//
-//    final int previousIndex = _controller.previousIndex;
-//    if ((_currentIndex - previousIndex).abs() == 1)
-//      return _pageController.animateToPage(_currentIndex,
-//          duration: kTabScrollDuration, curve: Curves.ease);
-//
-//    assert((_currentIndex - previousIndex).abs() > 1);
-//    int initialPage;
-//    setState(() {
-//      _warpUnderwayCount += 1;
-//      _children = List<Widget>.from(widget.children, growable: false);
-//      if (_currentIndex > previousIndex) {
-//        _children[_currentIndex - 1] = _children[previousIndex];
-//        initialPage = _currentIndex - 1;
-//      } else {
-//        _children[_currentIndex + 1] = _children[previousIndex];
-//        initialPage = _currentIndex + 1;
-//      }
-//    });
-//
-//    _pageController.jumpToPage(initialPage);
-//
-//    await _pageController.animateToPage(_currentIndex,
-//        duration: kTabScrollDuration, curve: Curves.ease);
-//    if (!mounted) return Future<void>.value();
-//
-//    setState(() {
-//      _warpUnderwayCount -= 1;
-//      _children = widget.children;
-//    });
-//  }
-
-  ///fix https://github.com/flutter/flutter/issues/24660
-  ///    https://github.com/flutter/flutter/issues/27010
-  ///use pr from https://github.com/flutter/flutter/pull/24821/files
   Future<void> _warpToCurrentIndex() async {
     if (!mounted) return Future<void>.value();
 
@@ -190,33 +179,27 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
     assert((_currentIndex - previousIndex).abs() > 1);
     final int initialPage =
         _currentIndex > previousIndex ? _currentIndex - 1 : _currentIndex + 1;
+    final List<Widget> originalChildren = _childrenWithKey;
     setState(() {
       _warpUnderwayCount += 1;
-      _children = List<Widget>.from(widget.children, growable: false);
 
-      // Temporarily put the page currently in view to the position
-      // immediately to the left or right of the new target page.
-      // This gives the illusion of a warp directly from one page to the other,
-      // without the intervening pages being shown.
-      final Widget temp = _children[initialPage];
-      _children[initialPage] = _children[previousIndex];
-
-      // This is a hack: when the page currently in view has a GlobalKey,
-      // perform a full swap of this for the one that was in the left-or-right
-      // page position. This keeps only one GlobalKey in play.
-      if (_children[initialPage].key is GlobalKey)
-        _children[previousIndex] = temp;
+      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      final Widget temp = _childrenWithKey[initialPage];
+      _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
+      _childrenWithKey[previousIndex] = temp;
     });
-
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex,
         duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted) return Future<void>.value();
-
     setState(() {
       _warpUnderwayCount -= 1;
-      _children = widget.children;
+      if (widget.children != _children) {
+        _updateChildren();
+      } else {
+        _childrenWithKey = originalChildren;
+      }
     });
   }
 
@@ -271,6 +254,14 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      if (_controller.length != widget.children.length) {
+        throw FlutterError(
+            'Controller\'s length property (${_controller.length}) does not match the \n'
+            'number of tabs (${widget.children.length}) present in TabBar\'s tabs property.');
+      }
+      return true;
+    }());
     if (widget.linkWithAncestor) {
       _ancestor =
           context.ancestorStateOfType(TypeMatcher<_ExtendedTabBarViewState>());
@@ -280,12 +271,13 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
       child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
         child: ExtendedPageView(
+          dragStartBehavior: widget.dragStartBehavior,
           controller: _pageController,
           cacheExtent: widget.cacheExtent,
           physics: widget.physics == null
               ? _kTabBarViewPhysics
               : _kTabBarViewPhysics.applyTo(widget.physics),
-          children: _children,
+          children: _childrenWithKey,
         ),
       ),
     );

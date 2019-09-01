@@ -1,3 +1,7 @@
+## [0.2.2]
+
+*  fix null exception
+  
 ## [0.2.1]
 
 *  improve codes base on v1.7.8

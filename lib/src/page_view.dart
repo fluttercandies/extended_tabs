@@ -219,7 +219,7 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         controller: widget.controller,
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
-          if (widget.cacheExtent > 0) {
+          if (widget.cacheExtent != null && widget.cacheExtent > 0) {
             return LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               return Viewport(

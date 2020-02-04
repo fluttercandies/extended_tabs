@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:extended_tabs/extended_tabs.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(MyApp());
 
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Extended Tabs Demo'),
+      home: MyHomePage(title: 'ExtendedTabs'),
     );
   }
 }
@@ -54,7 +55,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     tabController = TabController(length: 2, vsync: this);
     tabController1 = TabController(length: 3, vsync: this);
     tabController2 = TabController(length: 4, vsync: this);
-    // TODO: implement initState
     super.initState();
   }
 
@@ -65,6 +65,36 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: <Widget>[
+          ButtonTheme(
+            minWidth: 0.0,
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            child: FlatButton(
+              child: Text(
+                'Github',
+                style: TextStyle(
+                  decorationStyle: TextDecorationStyle.solid,
+                  decoration: TextDecoration.underline,
+                  color: Colors.white,
+                ),
+              ),
+              onPressed: () {
+                launch('https://github.com/fluttercandies/extended_tabs');
+              },
+            ),
+          ),
+          ButtonTheme(
+            padding: EdgeInsets.only(right: 10.0),
+            minWidth: 0.0,
+            child: FlatButton(
+              child:
+                  Image.network('https://pub.idqqimg.com/wpa/images/group.png'),
+              onPressed: () {
+                launch('https://jq.qq.com/?_wv=1027&k=5bcc0gy');
+              },
+            ),
+          )
+        ],
       ),
       body: Column(
         children: <Widget>[

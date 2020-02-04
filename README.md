@@ -4,6 +4,8 @@
 
 extended tab bar view include color tabIndicator,linkWithAncestor(scroll ancestor tabbarView when current is over scroll),page cache extent
 
+[Web demo for ExtendedTabs](https://fluttercandies.github.io/extended_tabs/)
+
 [Chinese blog](https://juejin.im/post/5c34b87ef265da61553b01a8)
 
 ![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/extended_tab.gif)

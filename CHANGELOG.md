@@ -1,3 +1,7 @@
+## [0.2.3]
+
+*  web support
+
 ## [0.2.2]
 
 *  fix null exception

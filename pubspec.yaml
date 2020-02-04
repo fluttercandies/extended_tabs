@@ -1,6 +1,6 @@
 name: extended_tabs
 description: extended tab bar view include color tabIndicator,linkWithAncestor,page cache extent
-version: 0.2.2
+version: 0.2.3
 author: zmtzawq <zmtzawqlp@live.com>
 homepage: https://github.com/fluttercandies/extended_tabs
 

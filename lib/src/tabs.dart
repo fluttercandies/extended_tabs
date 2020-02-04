@@ -264,7 +264,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
     }());
     if (widget.linkWithAncestor) {
       _ancestor =
-          context.ancestorStateOfType(TypeMatcher<_ExtendedTabBarViewState>());
+          context.findAncestorStateOfType<_ExtendedTabBarViewState>();
     }
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,

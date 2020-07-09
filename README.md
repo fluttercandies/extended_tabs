@@ -69,3 +69,7 @@ Show tab indicator with color fill
 ```
 
 Please see the example app of this plugin for a full example.
+
+## ☕️Buy me a coffee
+
+![img](http://zmtzawqlp.gitee.io/my_images/images/qrcode.png)

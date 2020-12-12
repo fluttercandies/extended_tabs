@@ -10,6 +10,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+const ScrollPhysics _defaultScrollPhysics = NeverScrollableScrollPhysics();
+
+final PageMetrics _testPageMetrics = PageMetrics(
+  axisDirection: AxisDirection.down,
+  minScrollExtent: 0,
+  maxScrollExtent: 10,
+  pixels: 5,
+  viewportDimension: 10,
+  viewportFraction: 1.0,
+);
+
 /// A page view that displays the widget which corresponds to the currently
 /// selected tab.
 ///
@@ -26,15 +37,16 @@ class ExtendedTabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
   /// The length of [children] must be the same as the [controller]'s length.
-  const ExtendedTabBarView(
-      {Key key,
-      @required this.children,
-      this.controller,
-      this.physics,
-      this.dragStartBehavior = DragStartBehavior.start,
-      this.cacheExtent = 0,
-      this.linkWithAncestor = true})
-      : assert(children != null),
+  const ExtendedTabBarView({
+    Key key,
+    @required this.children,
+    this.controller,
+    this.physics,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.cacheExtent = 0,
+    this.linkWithAncestor = true,
+    this.scrollDirection = Axis.horizontal,
+  })  : assert(children != null),
         assert(dragStartBehavior != null),
         super(key: key);
 
@@ -75,12 +87,14 @@ class ExtendedTabBarView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// The axis along which the page view scrolls.
+  ///
+  /// Defaults to [Axis.horizontal].
+  final Axis scrollDirection;
+
   @override
   _ExtendedTabBarViewState createState() => _ExtendedTabBarViewState();
 }
-
-final PageScrollPhysics _kTabBarViewPhysics =
-    const PageScrollPhysics().applyTo(const ClampingScrollPhysics());
 
 class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   TabController _controller;
@@ -90,7 +104,8 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
-
+  ScrollPhysics _physics;
+  bool _canMove;
   // If the TabBarView is rebuilt with a new tab controller, the caller should
   // dispose the old one. In that case the old controller's animation will be
   // null and should not be accessed.
@@ -110,7 +125,9 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
       return true;
     }());
 
-    if (newController == _controller) return;
+    if (newController == _controller) {
+      return;
+    }
 
     if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
@@ -119,15 +136,32 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
   }
 
+  void _updatePhysics() {
+    _physics = _defaultScrollPhysics.applyTo(widget.physics == null
+        ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
+        : const PageScrollPhysics().applyTo(widget.physics));
+
+    if (widget.physics == null) {
+      _canMove = true;
+    } else {
+      _canMove = widget.physics.shouldAcceptUserOffset(_testPageMetrics);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _updatePhysics();
     _updateChildren();
+    _initGestureRecognizers();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (widget.linkWithAncestor) {
+      _ancestor = context.findAncestorStateOfType<_ExtendedTabBarViewState>();
+    }
     _updateTabController();
     _currentIndex = _controller?.index;
     _pageController = PageController(initialPage: _currentIndex ?? 0);
@@ -136,9 +170,16 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   @override
   void didUpdateWidget(ExtendedTabBarView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) _updateTabController();
+    if (widget.controller != oldWidget.controller) {
+      _updateTabController();
+    }
+    if (widget.physics != oldWidget.physics) {
+      _updatePhysics();
+    }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
+
+    _initGestureRecognizers(oldWidget);
   }
 
   @override
@@ -166,15 +207,21 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   }
 
   Future<void> _warpToCurrentIndex() async {
-    if (!mounted) return Future<void>.value();
+    if (!mounted) {
+      return Future<void>.value();
+    }
 
     if (_pageController.page == _currentIndex.toDouble())
       return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
-    if ((_currentIndex - previousIndex).abs() == 1)
-      return _pageController.animateToPage(_currentIndex,
+    if ((_currentIndex - previousIndex).abs() == 1) {
+      _warpUnderwayCount += 1;
+      await _pageController.animateToPage(_currentIndex,
           duration: kTabScrollDuration, curve: Curves.ease);
+      _warpUnderwayCount -= 1;
+      return Future<void>.value();
+    }
 
     assert((_currentIndex - previousIndex).abs() > 1);
     final int initialPage =
@@ -192,7 +239,9 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
 
     await _pageController.animateToPage(_currentIndex,
         duration: kTabScrollDuration, curve: Curves.ease);
-    if (!mounted) return Future<void>.value();
+    if (!mounted) {
+      return Future<void>.value();
+    }
     setState(() {
       _warpUnderwayCount -= 1;
       if (widget.children != _children) {
@@ -205,9 +254,13 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
 
   // Called when the PageView scrolls
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (_warpUnderwayCount > 0) return false;
+    if (_warpUnderwayCount > 0) {
+      return false;
+    }
 
-    if (notification.depth != 0) return false;
+    if (notification.depth != 0) {
+      return false;
+    }
 
     _warpUnderwayCount += 1;
     if (notification is ScrollUpdateNotification &&
@@ -217,10 +270,14 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
         _currentIndex = _controller.index;
       }
       _controller.offset =
-          (_pageController.page - _controller.index).clamp(-1.0, 1.0);
+          (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
+      if (!_controller.indexIsChanging) {
+        _controller.offset = (_pageController.page - _controller.index)
+            .clamp(-1.0, 1.0) as double;
+      }
     } else if (notification is OverscrollNotification && _ancestor != null) {
       if (_canlinkeWithAncestorScroll(notification.overscroll < 0)) {
         _ancestor._pageController.position
@@ -243,13 +300,15 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
 
   bool _canlinkeWithAncestorScroll(bool onLeftEdge) {
     //return false;
-    if (_ancestor == null) return false;
+    if (_ancestor == null) {
+      return false;
+    }
     return (onLeftEdge &&
             _ancestor._pageController.offset !=
                 _ancestor._pageController.position.minScrollExtent) ||
-        ((!onLeftEdge &&
+        (!onLeftEdge &&
             _ancestor._pageController.offset !=
-                _ancestor._pageController.position.maxScrollExtent));
+                _ancestor._pageController.position.maxScrollExtent);
   }
 
   @override
@@ -262,11 +321,8 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
       }
       return true;
     }());
-    if (widget.linkWithAncestor) {
-      _ancestor =
-          context.findAncestorStateOfType<_ExtendedTabBarViewState>();
-    }
-    return NotificationListener<ScrollNotification>(
+
+    Widget result = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
@@ -274,12 +330,126 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
           dragStartBehavior: widget.dragStartBehavior,
           controller: _pageController,
           cacheExtent: widget.cacheExtent,
-          physics: widget.physics == null
-              ? _kTabBarViewPhysics
-              : _kTabBarViewPhysics.applyTo(widget.physics),
+          scrollDirection: widget.scrollDirection,
+          physics: _physics,
           children: _childrenWithKey,
         ),
       ),
     );
+
+    if (_canMove) {
+      result = RawGestureDetector(
+        gestures: _gestureRecognizers,
+        behavior: HitTestBehavior.opaque,
+        child: result,
+      );
+    }
+    return result;
+  }
+
+  void _initGestureRecognizers([ExtendedTabBarView oldWidget]) {
+    if (oldWidget == null ||
+        oldWidget.scrollDirection != widget.scrollDirection ||
+        oldWidget.physics != widget.physics) {
+      if (_canMove) {
+        switch (widget.scrollDirection) {
+          case Axis.vertical:
+            _gestureRecognizers = <Type, GestureRecognizerFactory>{
+              VerticalDragGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<
+                      VerticalDragGestureRecognizer>(
+                () => VerticalDragGestureRecognizer(),
+                (VerticalDragGestureRecognizer instance) {
+                  instance
+                    ..onDown = _handleDragDown
+                    ..onStart = _handleDragStart
+                    ..onUpdate = _handleDragUpdate
+                    ..onEnd = _handleDragEnd
+                    ..onCancel = _handleDragCancel
+                    ..minFlingDistance = widget.physics?.minFlingDistance
+                    ..minFlingVelocity = widget.physics?.minFlingVelocity
+                    ..maxFlingVelocity = widget.physics?.maxFlingVelocity;
+                },
+              ),
+            };
+            break;
+          case Axis.horizontal:
+            _gestureRecognizers = <Type, GestureRecognizerFactory>{
+              HorizontalDragGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<
+                      HorizontalDragGestureRecognizer>(
+                () => HorizontalDragGestureRecognizer(),
+                (HorizontalDragGestureRecognizer instance) {
+                  instance
+                    ..onDown = _handleDragDown
+                    ..onStart = _handleDragStart
+                    ..onUpdate = _handleDragUpdate
+                    ..onEnd = _handleDragEnd
+                    ..onCancel = _handleDragCancel
+                    ..minFlingDistance = widget.physics?.minFlingDistance
+                    ..minFlingVelocity = widget.physics?.minFlingVelocity
+                    ..maxFlingVelocity = widget.physics?.maxFlingVelocity;
+                },
+              ),
+            };
+            break;
+        }
+      }
+    }
+  }
+
+  Drag _drag;
+  ScrollHoldController _hold;
+  ScrollPosition get position => _pageController.position;
+  Map<Type, GestureRecognizerFactory> _gestureRecognizers =
+      const <Type, GestureRecognizerFactory>{};
+  void _handleDragDown(DragDownDetails details) {
+    //print(details);
+    assert(_drag == null);
+    assert(_hold == null);
+    _hold = position.hold(_disposeHold);
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    // It's possible for _hold to become null between _handleDragDown and
+    // _handleDragStart, for example if some user code calls jumpTo or otherwise
+    // triggers a new activity to begin.
+    assert(_drag == null);
+    _drag = position.drag(details, _disposeDrag);
+    assert(_drag != null);
+    assert(_hold == null);
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
+    _drag?.update(details);
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
+
+    _drag?.end(details);
+
+    assert(_drag == null);
+  }
+
+  void _handleDragCancel() {
+    // _hold might be null if the drag started.
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
+    _hold?.cancel();
+    _drag?.cancel();
+    assert(_hold == null);
+    assert(_drag == null);
+  }
+
+  void _disposeHold() {
+    _hold = null;
+  }
+
+  void _disposeDrag() {
+    _drag = null;
   }
 }

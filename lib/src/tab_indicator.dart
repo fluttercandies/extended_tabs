@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ColorTabIndicator extends Decoration {
-  ColorTabIndicator(this.color);
+  const ColorTabIndicator(this.color);
 
   /// The color and weight of the horizontal line drawn below the selected tab.
   final Color color;

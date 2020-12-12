@@ -13,22 +13,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // This is the theme of your application.
         //
-        // Try running your application with "flutter run". You'll see the
+        // Try running your application with 'flutter run'. You'll see the
         // application has a blue toolbar. Then, without quitting the app, try
         // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
+        // 'hot reload' (press 'r' in the console where you ran 'flutter run',
+        // or simply save your changes to 'hot reload' in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'ExtendedTabs'),
+      home: const MyHomePage(title: 'ExtendedTabs'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -37,7 +37,7 @@ class MyHomePage extends StatefulWidget {
   // This class is the configuration for the state. It holds the values (in this
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  // always marked 'final'.
 
   final String title;
 
@@ -68,9 +68,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         actions: <Widget>[
           ButtonTheme(
             minWidth: 0.0,
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: FlatButton(
-              child: Text(
+              child: const Text(
                 'Github',
                 style: TextStyle(
                   decorationStyle: TextDecorationStyle.solid,
@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           ButtonTheme(
-            padding: EdgeInsets.only(right: 10.0),
+            padding: const EdgeInsets.only(right: 10.0),
             minWidth: 0.0,
             child: FlatButton(
               child:
@@ -99,11 +99,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       body: Column(
         children: <Widget>[
           TabBar(
-            indicator: ColorTabIndicator(Colors.blue),
+            indicator: const ColorTabIndicator(Colors.blue),
             labelColor: Colors.black,
-            tabs: [
-              Tab(text: "Tab0"),
-              Tab(text: "Tab1"),
+            tabs: const <Tab>[
+              Tab(text: 'Tab0'),
+              Tab(text: 'Tab1'),
             ],
             controller: tabController,
           ),
@@ -113,12 +113,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 Column(
                   children: <Widget>[
                     TabBar(
-                      indicator: ColorTabIndicator(Colors.red),
+                      indicator: const ColorTabIndicator(Colors.red),
                       labelColor: Colors.black,
-                      tabs: [
-                        Tab(text: "Tab00"),
-                        Tab(text: "Tab01"),
-                        Tab(text: "Tab02"),
+                      tabs: const <Tab>[
+                        Tab(text: 'Tab00'),
+                        Tab(text: 'Tab01'),
+                        Tab(text: 'Tab02'),
                       ],
                       controller: tabController1,
                     ),
@@ -128,23 +128,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           Column(
                             children: <Widget>[
                               TabBar(
-                                indicator: ColorTabIndicator(Colors.green),
+                                indicator:
+                                    const ColorTabIndicator(Colors.green),
                                 labelColor: Colors.black,
-                                tabs: [
-                                  Tab(text: "Tab000"),
-                                  Tab(text: "Tab001"),
-                                  Tab(text: "Tab002"),
-                                  Tab(text: "Tab003"),
+                                tabs: const <Tab>[
+                                  Tab(text: 'Tab000'),
+                                  Tab(text: 'Tab001'),
+                                  Tab(text: 'Tab002'),
+                                  Tab(text: 'Tab003'),
                                 ],
                                 controller: tabController2,
                               ),
                               Expanded(
                                 child: ExtendedTabBarView(
-                                  children: <Widget>[
-                                    List("Tab000"),
-                                    List("Tab001"),
-                                    List("Tab002"),
-                                    List("Tab003"),
+                                  children: const <Widget>[
+                                    List('Tab000'),
+                                    List('Tab001'),
+                                    List('Tab002'),
+                                    List('Tab003'),
                                   ],
                                   controller: tabController2,
 
@@ -162,15 +163,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               )
                             ],
                           ),
-                          List("Tab01"),
-                          List("Tab02"),
+                          const List('Tab01'),
+                          const List('Tab02'),
                         ],
                         controller: tabController1,
                       ),
                     )
                   ],
                 ),
-                List("Tab1")
+                const List('Tab1')
               ],
               controller: tabController,
             ),
@@ -182,17 +183,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 class List extends StatelessWidget {
+  const List(this.tabKey);
   final String tabKey;
-  List(this.tabKey);
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemBuilder: (c, i) {
+        itemBuilder: (BuildContext c, int i) {
           return Container(
             //decoration: BoxDecoration(border: Border.all(color: Colors.orange,width: 1.0)),
             alignment: Alignment.center,
             height: 60.0,
-            child: Text("$tabKey : List$i"),
+            child: Text('$tabKey : List$i'),
           );
         },
         itemCount: 100);

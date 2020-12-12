@@ -55,8 +55,13 @@ class ExtendedPageView extends StatefulWidget {
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
+    this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
-  })  : controller = controller ?? _defaultPageController,
+  })  : assert(allowImplicitScrolling != null),
+        assert(clipBehavior != null),
+        controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
         super(key: key);
 
@@ -83,8 +88,13 @@ class ExtendedPageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
-  })  : controller = controller ?? _defaultPageController,
+  })  : assert(allowImplicitScrolling != null),
+        assert(clipBehavior != null),
+        controller = controller ?? _defaultPageController,
         childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
         super(key: key);
@@ -101,16 +111,31 @@ class ExtendedPageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
   })  : assert(childrenDelegate != null),
+        assert(allowImplicitScrolling != null),
+        assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
         super(key: key);
 
-  /// cache page count
-  /// default is 0.
-  /// if cacheExtent is 1, it has two pages in cache
-  /// null is infinity, it will cache all pages
-  final int cacheExtent;
+  /// Controls whether the widget's pages will respond to
+  /// [RenderObject.showOnScreen], which will allow for implicit accessibility
+  /// scrolling.
+  ///
+  /// With this flag set to false, when accessibility focus reaches the end of
+  /// the current page and the user attempts to move it to the next element, the
+  /// focus will traverse to the next widget outside of the page view.
+  ///
+  /// With this flag set to true, when accessibility focus reaches the end of
+  /// the current page and user attempts to move it to the next element, focus
+  /// will traverse to the next page in the page view.
+  final bool allowImplicitScrolling;
+
+  /// {@macro flutter.widgets.scrollable.restorationId}
+  final String restorationId;
 
   /// The axis along which the page view scrolls.
   ///
@@ -163,6 +188,16 @@ class ExtendedPageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// cache page count
+  /// default is 0.
+  /// if cacheExtent is 1, it has two pages in cache
+  /// null is infinity, it will cache all pages
+  final int cacheExtent;
   @override
   _ExtendedPageViewState createState() => _ExtendedPageViewState();
 }
@@ -195,16 +230,18 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = widget.pageSnapping
+    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
+      allowImplicitScrolling: widget.allowImplicitScrolling,
+    ).applyTo(widget.pageSnapping
         ? _kPagePhysics.applyTo(widget.physics)
-        : widget.physics;
+        : widget.physics);
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification.depth == 0 &&
             widget.onPageChanged != null &&
             notification is ScrollUpdateNotification) {
-          final PageMetrics metrics = notification.metrics;
+          final PageMetrics metrics = notification.metrics as PageMetrics;
           final int currentPage = metrics.page.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;
@@ -218,35 +255,46 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           if (widget.cacheExtent != null && widget.cacheExtent > 0) {
             return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              return Viewport(
-                cacheExtent: widget.cacheExtent * constraints.maxWidth,
-                axisDirection: axisDirection,
-                offset: position,
-                slivers: <Widget>[
-                  SliverFillViewport(
-                      viewportFraction: widget.controller.viewportFraction,
-                      delegate: widget.childrenDelegate),
-                ],
+                builder: (BuildContext context, BoxConstraints boxConstraints) {
+              final Axis axis = axisDirectionToAxis(axisDirection);
+              return _createViewport(
+                axisDirection,
+                position,
+                widget.cacheExtent *
+                    (axis == Axis.horizontal
+                        ? boxConstraints.maxWidth
+                        : boxConstraints.maxHeight),
               );
             });
           } else {
-            return Viewport(
-              cacheExtent: widget.cacheExtent == null ? double.infinity : 0.0,
-              axisDirection: axisDirection,
-              offset: position,
-              slivers: <Widget>[
-                SliverFillViewport(
-                    viewportFraction: widget.controller.viewportFraction,
-                    delegate: widget.childrenDelegate),
-              ],
-            );
+            return _createViewport(axisDirection, position, null);
           }
         },
       ),
+    );
+  }
+
+  Viewport _createViewport(AxisDirection axisDirection, ViewportOffset position,
+      double cacheExtent) {
+    return Viewport(
+      // TODO(dnfield): we should provide a way to set cacheExtent
+      // independent of implicit scrolling:
+      // https://github.com/flutter/flutter/issues/45632
+      cacheExtent: cacheExtent ?? (widget.allowImplicitScrolling ? 1.0 : 0.0),
+      cacheExtentStyle: CacheExtentStyle.viewport,
+      axisDirection: axisDirection,
+      offset: position,
+      clipBehavior: widget.clipBehavior,
+      slivers: <Widget>[
+        SliverFillViewport(
+          viewportFraction: widget.controller.viewportFraction,
+          delegate: widget.childrenDelegate,
+        ),
+      ],
     );
   }
 
@@ -265,5 +313,27 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         showName: false));
     description.add(FlagProperty('pageSnapping',
         value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+    description.add(FlagProperty('allowImplicitScrolling',
+        value: widget.allowImplicitScrolling,
+        ifTrue: 'allow implicit scrolling'));
   }
+}
+
+class _ForceImplicitScrollPhysics extends ScrollPhysics {
+  const _ForceImplicitScrollPhysics({
+    @required this.allowImplicitScrolling,
+    ScrollPhysics parent,
+  })  : assert(allowImplicitScrolling != null),
+        super(parent: parent);
+
+  @override
+  _ForceImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return _ForceImplicitScrollPhysics(
+      allowImplicitScrolling: allowImplicitScrolling,
+      parent: buildParent(ancestor),
+    );
+  }
+
+  @override
+  final bool allowImplicitScrolling;
 }

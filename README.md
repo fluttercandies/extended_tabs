@@ -10,7 +10,9 @@ A powerful official extension library of Tab/TabBar/TabView, which support to sc
 [Web demo for ExtendedTabs](https://fluttercandies.github.io/extended_tabs/)
 
 
-![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/link.gif) | ![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/scrollDirection.gif) | 
+![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/link.gif)
+
+![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/scrollDirection.gif) 
 
 - [extended_tabs](#extended_tabs)
   - [Usage](#usage)

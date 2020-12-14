@@ -10,7 +10,9 @@
 
 [Flutter 扩展的联动Tabs](https://juejin.im/post/5c34b87ef265da61553b01a8)
 
-![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/link.gif) | ![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/scrollDirection.gif) | 
+![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/link.gif)
+
+![](https://github.com/fluttercandies/Flutter_Candies/tree/master/gif/extended_tab/scrollDirection.gif) 
 
 - [extended_tabs](#extended_tabs)
   - [使用](#使用)

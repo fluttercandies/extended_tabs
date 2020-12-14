@@ -1,6 +1,9 @@
 ## 1.0.0
 
-* improve
+* breaking change:
+  change linkWithAncestor to link.
+* improve link function
+* add Axis scrollDirection for TabBar and TabBarView  
   
 ## 0.2.3
 

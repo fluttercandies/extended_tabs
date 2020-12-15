@@ -269,12 +269,12 @@ class _TabStyle extends AnimatedWidget {
     // the same value of inherit. Force that to be inherit=true here.
     final TextStyle defaultStyle = (labelStyle ??
             tabBarTheme.labelStyle ??
-            themeData.primaryTextTheme.bodyText1)
+            themeData.primaryTextTheme.body2)
         .copyWith(inherit: true);
     final TextStyle defaultUnselectedStyle = (unselectedLabelStyle ??
             tabBarTheme.unselectedLabelStyle ??
             labelStyle ??
-            themeData.primaryTextTheme.bodyText1)
+            themeData.primaryTextTheme.body2)
         .copyWith(inherit: true);
     final TextStyle textStyle = selected
         ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
@@ -282,7 +282,7 @@ class _TabStyle extends AnimatedWidget {
 
     final Color selectedColor = labelColor ??
         tabBarTheme.labelColor ??
-        themeData.primaryTextTheme.bodyText1.color;
+        themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor ??
         tabBarTheme.unselectedLabelColor ??
         selectedColor.withAlpha(0xB2); // 70% alpha
@@ -523,7 +523,6 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.mouseCursor,
     this.onTap,
     this.physics,
     this.scrollDirection = Axis.horizontal,
@@ -653,12 +652,6 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
-
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// individual tab widgets.
-  ///
-  /// If this property is null, [SystemMouseCursors.click] will be used.
-  final MouseCursor mouseCursor;
 
   /// An optional callback that's called when the [ExtendedTabBar] is tapped.
   ///
@@ -1040,7 +1033,6 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
       wrappedTabs[index] = InkWell(
-        mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () {
           _handleTap(index);
         },

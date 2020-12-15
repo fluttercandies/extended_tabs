@@ -56,7 +56,6 @@ class ExtendedPageView extends StatefulWidget {
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
-    this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
   })  : assert(allowImplicitScrolling != null),
@@ -89,7 +88,6 @@ class ExtendedPageView extends StatefulWidget {
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
-    this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
   })  : assert(allowImplicitScrolling != null),
@@ -112,7 +110,6 @@ class ExtendedPageView extends StatefulWidget {
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
-    this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
   })  : assert(childrenDelegate != null),
@@ -133,9 +130,6 @@ class ExtendedPageView extends StatefulWidget {
   /// the current page and user attempts to move it to the next element, focus
   /// will traverse to the next page in the page view.
   final bool allowImplicitScrolling;
-
-  /// {@macro flutter.widgets.scrollable.restorationId}
-  final String restorationId;
 
   /// The axis along which the page view scrolls.
   ///
@@ -255,7 +249,6 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
-        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           if (widget.cacheExtent != null && widget.cacheExtent > 0) {
             return LayoutBuilder(
@@ -285,10 +278,8 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
       // independent of implicit scrolling:
       // https://github.com/flutter/flutter/issues/45632
       cacheExtent: cacheExtent ?? (widget.allowImplicitScrolling ? 1.0 : 0.0),
-      cacheExtentStyle: CacheExtentStyle.viewport,
       axisDirection: axisDirection,
       offset: position,
-      clipBehavior: widget.clipBehavior,
       slivers: <Widget>[
         SliverFillViewport(
           viewportFraction: widget.controller.viewportFraction,

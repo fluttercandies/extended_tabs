@@ -7,16 +7,6 @@ class ColorTabIndicator extends Decoration {
   final Color color;
 
   @override
-  Decoration lerpFrom(Decoration a, double t) {
-    return super.lerpFrom(a, t);
-  }
-
-  @override
-  Decoration lerpTo(Decoration b, double t) {
-    return super.lerpTo(b, t);
-  }
-
-  @override
   _ColorPainter createBoxPainter([VoidCallback onChanged]) {
     return _ColorPainter(this, onChanged);
   }
@@ -128,7 +118,6 @@ class ExtendedUnderlineTabIndicator extends Decoration {
           );
   }
 
-  @override
   Path getClipPath(Rect rect, TextDirection textDirection) {
     return Path()
       ..addRect(_indicatorRectFor(rect, textDirection, scrollDirection));

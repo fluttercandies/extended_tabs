@@ -105,7 +105,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   int _currentIndex;
   int _warpUnderwayCount = 0;
   ScrollPhysics _physics;
-  bool _canMove;
+  bool _canDrag;
   // If the TabBarView is rebuilt with a new tab controller, the caller should
   // dispose the old one. In that case the old controller's animation will be
   // null and should not be accessed.
@@ -142,9 +142,9 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
         : const PageScrollPhysics().applyTo(widget.physics));
 
     if (widget.physics == null) {
-      _canMove = true;
+      _canDrag = true;
     } else {
-      _canMove = widget.physics.shouldAcceptUserOffset(_testPageMetrics);
+      _canDrag = widget.physics.shouldAcceptUserOffset(_testPageMetrics);
     }
   }
 
@@ -344,7 +344,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
       ),
     );
 
-    if (_canMove) {
+    if (_canDrag) {
       result = RawGestureDetector(
         gestures: _gestureRecognizers,
         behavior: HitTestBehavior.opaque,
@@ -358,7 +358,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
     if (oldWidget == null ||
         oldWidget.scrollDirection != widget.scrollDirection ||
         oldWidget.physics != widget.physics) {
-      if (_canMove) {
+      if (_canDrag) {
         switch (widget.scrollDirection) {
           case Axis.vertical:
             _gestureRecognizers = <Type, GestureRecognizerFactory>{
@@ -401,6 +401,10 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
             };
             break;
         }
+      } else {
+        _gestureRecognizers = null;
+        _hold?.cancel();
+        _drag?.cancel();
       }
     }
   }
@@ -442,7 +446,15 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
 
     _handleAncestorOrChild(details, _child);
 
-    _drag?.update(details);
+    // TODO(zmtzawqlp): if there are two drag, how to do we do?
+    assert(!(_ancestor?._drag != null && _child?._drag != null));
+    if (_ancestor?._drag != null) {
+      _ancestor._drag.update(details);
+    } else if (_child?._drag != null) {
+      _child._drag.update(details);
+    } else {
+      _drag?.update(details);
+    }
   }
 
   bool _handleAncestorOrChild(
@@ -469,7 +481,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
             sourceTimeStamp: details.sourceTimeStamp,
           ));
         }
-        state._handleDragUpdate(details);
+        //state._handleDragUpdate(details);
         return true;
       }
     }

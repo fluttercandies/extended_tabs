@@ -1,3 +1,7 @@
+## 1.0.1
+
+*  When _ancestor/_child TabBarView is draging, we should finish it frist
+  
 ## 1.0.0
 
 * breaking change:

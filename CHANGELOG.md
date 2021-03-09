@@ -1,3 +1,6 @@
+## 2.0.0-non-null-safety
+
+* non-null-safety
 ## 1.0.1
 
 *  When _ancestor/_child TabBarView is draging, we should finish it frist

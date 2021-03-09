@@ -19,7 +19,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  ff_annotation_route: any
+  ff_annotation_route: ^4.2.3
 
 flutter:
 

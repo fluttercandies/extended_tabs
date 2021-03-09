@@ -46,10 +46,10 @@ class ExtendedPageView extends StatefulWidget {
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
   ExtendedPageView({
-    Key key,
+    Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController controller,
+    PageController? controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -59,9 +59,7 @@ class ExtendedPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
-  })  : assert(allowImplicitScrolling != null),
-        assert(clipBehavior != null),
-        controller = controller ?? _defaultPageController,
+  })  : controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
         super(key: key);
 
@@ -78,23 +76,21 @@ class ExtendedPageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   ExtendedPageView.builder({
-    Key key,
+    Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController controller,
+    PageController? controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    @required IndexedWidgetBuilder itemBuilder,
-    int itemCount,
+    required IndexedWidgetBuilder itemBuilder,
+    int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
-  })  : assert(allowImplicitScrolling != null),
-        assert(clipBehavior != null),
-        controller = controller ?? _defaultPageController,
+  })  : controller = controller ?? _defaultPageController,
         childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
         super(key: key);
@@ -102,23 +98,20 @@ class ExtendedPageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
   ExtendedPageView.custom({
-    Key key,
+    Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController controller,
+    PageController? controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    @required this.childrenDelegate,
+    required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
-  })  : assert(childrenDelegate != null),
-        assert(allowImplicitScrolling != null),
-        assert(clipBehavior != null),
-        controller = controller ?? _defaultPageController,
+  })  : controller = controller ?? _defaultPageController,
         super(key: key);
 
   /// Controls whether the widget's pages will respond to
@@ -135,7 +128,7 @@ class ExtendedPageView extends StatefulWidget {
   final bool allowImplicitScrolling;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
-  final String restorationId;
+  final String? restorationId;
 
   /// The axis along which the page view scrolls.
   ///
@@ -169,13 +162,13 @@ class ExtendedPageView extends StatefulWidget {
   /// [PageScrollPhysics] prior to being used.
   ///
   /// Defaults to matching platform conventions.
-  final ScrollPhysics physics;
+  final ScrollPhysics? physics;
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
-  final ValueChanged<int> onPageChanged;
+  final ValueChanged<int>? onPageChanged;
 
   /// A delegate that provides the children for the [ExtendedPageView].
   ///
@@ -224,7 +217,6 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
-    return null;
   }
 
   @override
@@ -242,10 +234,10 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
             widget.onPageChanged != null &&
             notification is ScrollUpdateNotification) {
           final PageMetrics metrics = notification.metrics as PageMetrics;
-          final int currentPage = metrics.page.round();
+          final int currentPage = metrics.page!.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;
-            widget.onPageChanged(currentPage);
+            widget.onPageChanged!(currentPage);
           }
         }
         return false;
@@ -257,7 +249,7 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         physics: physics,
         restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
-          if (widget.cacheExtent != null && widget.cacheExtent > 0) {
+          if (widget.cacheExtent > 0) {
             return LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints boxConstraints) {
               final Axis axis = axisDirectionToAxis(axisDirection);
@@ -279,7 +271,7 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
   }
 
   Viewport _createViewport(AxisDirection axisDirection, ViewportOffset position,
-      double cacheExtent) {
+      double? cacheExtent) {
     return Viewport(
       // TODO(dnfield): we should provide a way to set cacheExtent
       // independent of implicit scrolling:
@@ -321,13 +313,12 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
 
 class _ForceImplicitScrollPhysics extends ScrollPhysics {
   const _ForceImplicitScrollPhysics({
-    @required this.allowImplicitScrolling,
-    ScrollPhysics parent,
-  })  : assert(allowImplicitScrolling != null),
-        super(parent: parent);
+    required this.allowImplicitScrolling,
+    ScrollPhysics? parent,
+  }) : super(parent: parent);
 
   @override
-  _ForceImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
+  _ForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return _ForceImplicitScrollPhysics(
       allowImplicitScrolling: allowImplicitScrolling,
       parent: buildParent(ancestor),

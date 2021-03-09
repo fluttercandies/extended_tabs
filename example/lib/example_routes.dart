@@ -6,7 +6,7 @@ const List<String> routeNames = <String>[
   'fluttercandies://demogrouppage',
   'fluttercandies://link',
   'fluttercandies://mainpage',
-  'fluttercandies://sroll_direction',
+  'fluttercandies://scroll_direction',
 ];
 
 class Routes {
@@ -20,7 +20,7 @@ class Routes {
   ///
   /// [constructors] :
   ///
-  /// DemoGroupPage : [MapEntry<String, List<DemoRouteResult>> keyValue]
+  /// DemoGroupPage : [MapEntry<String, List<DemoRouteResult>>(required) keyValue]
   static const String fluttercandiesDemogrouppage =
       'fluttercandies://demogrouppage';
 
@@ -46,15 +46,15 @@ class Routes {
   /// MainPage : []
   static const String fluttercandiesMainpage = 'fluttercandies://mainpage';
 
-  /// 'set ssroll direction of tabbar and tabView'
+  /// 'set scroll direction of tabbar and tabView'
   ///
-  /// [name] : 'fluttercandies://sroll_direction'
+  /// [name] : 'fluttercandies://scroll_direction'
   ///
-  /// [routeName] : 'SrollDirection'
+  /// [routeName] : 'ScrollDirection'
   ///
-  /// [description] : 'set ssroll direction of tabbar and tabView'
+  /// [description] : 'set scroll direction of tabbar and tabView'
   ///
   /// [exts] : {group: Simple, order: 1}
-  static const String fluttercandiesSrollDirection =
-      'fluttercandies://sroll_direction';
+  static const String fluttercandiesScrollDirection =
+      'fluttercandies://scroll_direction';
 }

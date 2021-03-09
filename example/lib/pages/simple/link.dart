@@ -1,7 +1,7 @@
 import 'package:example/widget/list.dart';
 import 'package:extended_tabs/extended_tabs.dart';
+import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
-import 'package:ff_annotation_route/ff_annotation_route.dart';
 
 @FFRoute(
   name: 'fluttercandies://link',
@@ -19,9 +19,9 @@ class LinkDemo extends StatefulWidget {
 }
 
 class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
-  TabController tabController;
-  TabController tabController1;
-  TabController tabController2;
+  TabController? tabController;
+  TabController? tabController1;
+  TabController? tabController2;
 
   @override
   void initState() {

@@ -7,33 +7,20 @@ class ColorTabIndicator extends Decoration {
   final Color color;
 
   @override
-  Decoration lerpFrom(Decoration a, double t) {
-    return super.lerpFrom(a, t);
-  }
-
-  @override
-  Decoration lerpTo(Decoration b, double t) {
-    return super.lerpTo(b, t);
-  }
-
-  @override
-  _ColorPainter createBoxPainter([VoidCallback onChanged]) {
+  _ColorPainter createBoxPainter([VoidCallback? onChanged]) {
     return _ColorPainter(this, onChanged);
   }
 }
 
 class _ColorPainter extends BoxPainter {
-  _ColorPainter(this.decoration, VoidCallback onChanged)
-      : assert(decoration != null),
-        super(onChanged);
+  _ColorPainter(this.decoration, VoidCallback? onChanged) : super(onChanged);
 
   final ColorTabIndicator decoration;
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
-    final Rect rect = offset & configuration.size;
+    final Rect rect = offset & configuration.size!;
     final Paint paint = Paint();
     paint.color = decoration.color;
     canvas.drawRect(rect, paint);
@@ -57,8 +44,7 @@ class ExtendedUnderlineTabIndicator extends Decoration {
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
     this.scrollDirection = Axis.horizontal,
-  })  : assert(borderSide != null),
-        assert(insets != null);
+  });
 
   /// The color and weight of the horizontal line drawn below the selected tab.
   final BorderSide borderSide;
@@ -77,11 +63,11 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   final Axis scrollDirection;
 
   @override
-  Decoration lerpFrom(Decoration a, double t) {
+  Decoration? lerpFrom(Decoration? a, double t) {
     if (a is ExtendedUnderlineTabIndicator) {
       return ExtendedUnderlineTabIndicator(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        insets: EdgeInsetsGeometry.lerp(a.insets, insets, t),
+        insets: EdgeInsetsGeometry.lerp(a.insets, insets, t)!,
         scrollDirection: a.scrollDirection,
       );
     }
@@ -89,11 +75,11 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   }
 
   @override
-  Decoration lerpTo(Decoration b, double t) {
+  Decoration? lerpTo(Decoration? b, double t) {
     if (b is ExtendedUnderlineTabIndicator) {
       return ExtendedUnderlineTabIndicator(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        insets: EdgeInsetsGeometry.lerp(insets, b.insets, t),
+        insets: EdgeInsetsGeometry.lerp(insets, b.insets, t)!,
         scrollDirection: b.scrollDirection,
       );
     }
@@ -101,14 +87,12 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   }
 
   @override
-  _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
+  _UnderlinePainter createBoxPainter([VoidCallback? onChanged]) {
     return _UnderlinePainter(this, onChanged);
   }
 
   Rect _indicatorRectFor(
       Rect rect, TextDirection textDirection, Axis scrollDirection) {
-    assert(rect != null);
-    assert(textDirection != null);
     final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
 
     return scrollDirection == Axis.horizontal
@@ -136,18 +120,16 @@ class ExtendedUnderlineTabIndicator extends Decoration {
 }
 
 class _UnderlinePainter extends BoxPainter {
-  _UnderlinePainter(this.decoration, VoidCallback onChanged)
-      : assert(decoration != null),
-        super(onChanged);
+  _UnderlinePainter(this.decoration, VoidCallback? onChanged)
+      : super(onChanged);
 
   final ExtendedUnderlineTabIndicator decoration;
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
-    final Rect rect = offset & configuration.size;
-    final TextDirection textDirection = configuration.textDirection;
+    final Rect rect = offset & configuration.size!;
+    final TextDirection textDirection = configuration.textDirection!;
     final Rect indicator = decoration
         ._indicatorRectFor(rect, textDirection, decoration.scrollDirection)
         .deflate(decoration.borderSide.width / 2.0);

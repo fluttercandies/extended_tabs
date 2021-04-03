@@ -16,6 +16,7 @@ A powerful official extension library of Tab/TabBar/TabView, which support to sc
 
 - [extended_tabs](#extended_tabs)
   - [Usage](#usage)
+    - [CarouselIndicator](#carouselindicator)
     - [ColorTabIndicator](#colortabindicator)
     - [Link](#link)
     - [ScrollDirection](#scrolldirection)
@@ -28,6 +29,18 @@ dependencies:
   flutter:
     sdk: flutter
   extended_tabs: any
+```
+
+### CarouselIndicator
+Show tab indicator  as Carousel style
+``` dart
+   CarouselIndicator(
+     controller: _controller,
+     selectedColor: Colors.white,
+     unselectedColor: Colors.grey,
+     strokeCap: StrokeCap.round,
+     indicatorPadding: const EdgeInsets.all(5),
+   ),
 ```
 ### ColorTabIndicator
 Show tab indicator with color fill

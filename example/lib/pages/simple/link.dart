@@ -1,7 +1,7 @@
 import 'package:example/widget/list.dart';
 import 'package:extended_tabs/extended_tabs.dart';
+import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
-import 'package:ff_annotation_route/ff_annotation_route.dart';
 
 @FFRoute(
   name: 'fluttercandies://link',
@@ -25,10 +25,18 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    super.initState();
     tabController = TabController(length: 2, vsync: this);
     tabController1 = TabController(length: 3, vsync: this);
     tabController2 = TabController(length: 4, vsync: this);
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    tabController1.dispose();
+    tabController2.dispose();
+    super.dispose();
   }
 
   @override

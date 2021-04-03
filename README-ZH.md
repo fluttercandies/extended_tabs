@@ -16,6 +16,7 @@
 
 - [extended_tabs](#extended_tabs)
   - [使用](#使用)
+    - [传送带指示器](#传送带指示器)
     - [色块指示器](#色块指示器)
     - [嵌套滚动](#嵌套滚动)
     - [滚动方向](#滚动方向)
@@ -29,6 +30,17 @@ dependencies:
   flutter:
     sdk: flutter
   extended_tabs: any
+```
+
+### 传送带指示器
+``` dart
+   CarouselIndicator(
+     controller: _controller,
+     selectedColor: Colors.white,
+     unselectedColor: Colors.grey,
+     strokeCap: StrokeCap.round,
+     indicatorPadding: const EdgeInsets.all(5),
+   ),
 ```
 ### 色块指示器
 

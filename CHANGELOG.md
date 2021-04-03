@@ -1,3 +1,6 @@
+## 2.1.0-non-null-safety
+
+* add indicator with carousel style.
 ## 2.0.0-non-null-safety
 
 * non-null-safety

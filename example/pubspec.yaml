@@ -5,21 +5,20 @@ version: 1.0.0+1
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
-  flutter: ">=1.12.13"
+  flutter: ">=1.22.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   cupertino_icons: ^0.1.2
-  url_launcher: 5.3.0  
+  url_launcher: any
   extended_tabs:
     path: ../
-
+  ff_annotation_route_library: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  ff_annotation_route: ^4.2.3
 
 flutter:
 

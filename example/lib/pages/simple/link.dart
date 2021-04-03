@@ -19,16 +19,24 @@ class LinkDemo extends StatefulWidget {
 }
 
 class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
-  TabController? tabController;
-  TabController? tabController1;
-  TabController? tabController2;
+  late TabController tabController;
+  late TabController tabController1;
+  late TabController tabController2;
 
   @override
   void initState() {
+    super.initState();
     tabController = TabController(length: 2, vsync: this);
     tabController1 = TabController(length: 3, vsync: this);
     tabController2 = TabController(length: 4, vsync: this);
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    tabController1.dispose();
+    tabController2.dispose();
+    super.dispose();
   }
 
   @override

@@ -26,6 +26,12 @@ class _CarouselIndicatorDemoState extends State<CarouselIndicatorDemo>
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.orange,

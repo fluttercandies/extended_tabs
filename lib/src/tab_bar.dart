@@ -527,11 +527,16 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.physics,
     this.scrollDirection = Axis.horizontal,
+    this.foregroundIndicator = false,
+    this.strokeCap = StrokeCap.square,
   }) :
         //  assert(indicator != null ||
         //           (indicatorWeight != null && indicatorWeight > 0.0)),
         //       assert(indicator != null || (indicatorPadding != null)),
         super(key: key);
+
+  /// Whether the indicator is foreground
+  final bool foregroundIndicator;
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -713,6 +718,9 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to [Axis.horizontal].
   final Axis scrollDirection;
 
+  /// Styles to use for line endings.
+  final StrokeCap strokeCap;
+
   @override
   Size get preferredSize {
     for (final Widget item in tabs) {
@@ -781,6 +789,7 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
         color: color,
       ),
       scrollDirection: widget.scrollDirection,
+      strokeCap: widget.strokeCap,
     );
   }
 
@@ -1099,7 +1108,8 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
     }
 
     Widget tabBar = CustomPaint(
-      painter: _indicatorPainter,
+      painter: widget.foregroundIndicator ? null : _indicatorPainter,
+      foregroundPainter: widget.foregroundIndicator ? _indicatorPainter : null,
       child: _TabStyle(
         animation: kAlwaysDismissedAnimation,
         selected: false,

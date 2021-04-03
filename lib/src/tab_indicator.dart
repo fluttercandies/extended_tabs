@@ -44,6 +44,7 @@ class ExtendedUnderlineTabIndicator extends Decoration {
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
     this.scrollDirection = Axis.horizontal,
+    this.strokeCap = StrokeCap.square,
   });
 
   /// The color and weight of the horizontal line drawn below the selected tab.
@@ -61,6 +62,9 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   ///
   /// Defaults to [Axis.horizontal].
   final Axis scrollDirection;
+
+  /// Styles to use for line endings.
+  final StrokeCap strokeCap;
 
   @override
   Decoration? lerpFrom(Decoration? a, double t) {
@@ -134,7 +138,7 @@ class _UnderlinePainter extends BoxPainter {
         ._indicatorRectFor(rect, textDirection, decoration.scrollDirection)
         .deflate(decoration.borderSide.width / 2.0);
     final Paint paint = decoration.borderSide.toPaint()
-      ..strokeCap = StrokeCap.square;
+      ..strokeCap = decoration.strokeCap;
     switch (decoration.scrollDirection) {
       case Axis.horizontal:
         canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);

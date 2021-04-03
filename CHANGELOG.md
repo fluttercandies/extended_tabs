@@ -1,3 +1,7 @@
+## 2.1.0
+
+* add indicator with carousel style.
+
 ## 2.0.0
 
 * support null-safety

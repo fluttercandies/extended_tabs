@@ -80,6 +80,7 @@ class _IndicatorPainter extends CustomPainter {
     @required this.tabKeys,
     _IndicatorPainter old,
     this.scrollDirection,
+    this.mainAxisAlignment,
   })  : assert(controller != null),
         assert(indicator != null),
         super(repaint: controller.animation) {
@@ -92,6 +93,7 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize indicatorSize;
   final List<GlobalKey> tabKeys;
   final Axis scrollDirection;
+  final MainAxisAlignment mainAxisAlignment;
 
   List<double> _currentTabOffsets;
   TextDirection _currentTextDirection;
@@ -142,13 +144,84 @@ class _IndicatorPainter extends CustomPainter {
         break;
     }
 
-    if (indicatorSize == TabBarIndicatorSize.label) {
-      final double tabWidth = scrollDirection == Axis.horizontal
-          ? tabKeys[tabIndex].currentContext.size.width
-          : tabKeys[tabIndex].currentContext.size.height;
-      final double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
-      tabLeft += delta;
-      tabRight -= delta;
+    final double tabWidth = scrollDirection == Axis.horizontal
+        ? tabKeys[tabIndex].currentContext.size.width
+        : tabKeys[tabIndex].currentContext.size.height;
+
+    switch (mainAxisAlignment) {
+      case MainAxisAlignment.start:
+        if (_currentTextDirection == TextDirection.ltr &&
+            tabIndex == maxTabIndex) {
+          tabRight = tabLeft + tabWidth;
+        }
+        break;
+      case MainAxisAlignment.end:
+        if (_currentTextDirection == TextDirection.rtl && tabIndex == 0) {
+          tabRight = tabLeft + tabWidth;
+        }
+        break;
+      case MainAxisAlignment.center:
+        if ((_currentTextDirection == TextDirection.ltr &&
+                tabIndex == maxTabIndex) ||
+            (_currentTextDirection == TextDirection.rtl && tabIndex == 0)) {
+          tabRight = tabLeft + tabWidth;
+        }
+        break;
+      case MainAxisAlignment.spaceBetween:
+      case MainAxisAlignment.spaceAround:
+      case MainAxisAlignment.spaceEvenly:
+        if (indicatorSize == TabBarIndicatorSize.label) {
+          tabRight = tabLeft + tabWidth;
+        } else {
+          double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
+          tabRight -= delta;
+
+          switch (mainAxisAlignment) {
+            case MainAxisAlignment.spaceBetween:
+              if (tabIndex != 0 && _currentTextDirection == TextDirection.ltr) {
+                if (tabIndex == maxTabIndex) {
+                  final double preTabLeft = _currentTabOffsets[tabIndex - 1];
+                  final double preTabWidth = scrollDirection == Axis.horizontal
+                      ? tabKeys[tabIndex - 1].currentContext.size.width
+                      : tabKeys[tabIndex - 1].currentContext.size.height;
+                  delta = (tabLeft - preTabLeft - preTabWidth) / 2;
+                }
+                tabLeft -= delta;
+              } else if (tabIndex != maxTabIndex &&
+                  _currentTextDirection == TextDirection.rtl) {
+                if (tabIndex == 0) {
+                  final double preTabLeft = _currentTabOffsets[tabIndex + 2];
+                  final double preTabWidth = scrollDirection == Axis.horizontal
+                      ? tabKeys[tabIndex + 2].currentContext.size.width
+                      : tabKeys[tabIndex + 2].currentContext.size.height;
+
+                  delta = (tabLeft - preTabLeft - preTabWidth) / 2;
+                }
+                tabLeft -= delta;
+              }
+              break;
+            case MainAxisAlignment.spaceAround:
+              tabLeft -= delta;
+              if ((tabIndex == maxTabIndex &&
+                      _currentTextDirection == TextDirection.ltr) ||
+                  (tabIndex == 0 &&
+                      _currentTextDirection == TextDirection.rtl)) {
+                tabRight += delta;
+                tabLeft -= delta;
+              }
+              break;
+            case MainAxisAlignment.spaceEvenly:
+              tabLeft -= delta;
+
+              break;
+            default:
+          }
+        }
+        break;
+      default:
+        final double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
+        tabLeft += delta;
+        tabRight -= delta;
     }
 
     return scrollDirection == Axis.horizontal
@@ -221,7 +294,8 @@ class _IndicatorPainter extends CustomPainter {
         indicator != old.indicator ||
         tabKeys.length != old.tabKeys.length ||
         (!_tabOffsetsEqual(_currentTabOffsets, old._currentTabOffsets)) ||
-        _currentTextDirection != old._currentTextDirection;
+        _currentTextDirection != old._currentTextDirection ||
+        mainAxisAlignment != old.mainAxisAlignment;
   }
 }
 
@@ -370,12 +444,13 @@ class _TabLabelBar extends Flex {
     List<Widget> children = const <Widget>[],
     this.onPerformLayout,
     Axis scrollDirection,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
   }) : super(
             key: key,
             children: children,
             direction: scrollDirection,
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: mainAxisAlignment,
             crossAxisAlignment: scrollDirection == Axis.horizontal
                 ? CrossAxisAlignment.center
                 : CrossAxisAlignment.start,
@@ -529,6 +604,7 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
     this.scrollDirection = Axis.horizontal,
     this.foregroundIndicator = false,
     this.strokeCap = StrokeCap.square,
+    this.mainAxisAlignment,
   })  : assert(tabs != null),
         assert(isScrollable != null),
         assert(dragStartBehavior != null),
@@ -692,6 +768,10 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Styles to use for line endings.
   final StrokeCap strokeCap;
 
+  /// The MainAxisAlignment of Tabs
+  /// if this is not null, we will not add Exapnded for Tab when [isScrollable] is false
+  final MainAxisAlignment mainAxisAlignment;
+
   @override
   Size get preferredSize {
     for (final Widget item in tabs) {
@@ -805,6 +885,7 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
             tabKeys: _tabKeys,
             old: _indicatorPainter,
             scrollDirection: widget.scrollDirection,
+            mainAxisAlignment: widget.mainAxisAlignment,
           );
   }
 
@@ -825,7 +906,8 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
     } else if (widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
         widget.indicatorSize != oldWidget.indicatorSize ||
-        widget.indicator != oldWidget.indicator) {
+        widget.indicator != oldWidget.indicator ||
+        widget.mainAxisAlignment != oldWidget.mainAxisAlignment) {
       _initIndicatorPainter();
     }
 
@@ -1067,7 +1149,7 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
           ),
         ),
       );
-      if (!widget.isScrollable)
+      if (!widget.isScrollable && widget.mainAxisAlignment == null)
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
     }
 
@@ -1085,6 +1167,8 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
           onPerformLayout: _saveTabOffsets,
           children: wrappedTabs,
           scrollDirection: widget.scrollDirection,
+          mainAxisAlignment:
+              widget.mainAxisAlignment ?? MainAxisAlignment.start,
         ),
       ),
     );

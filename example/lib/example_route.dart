@@ -8,9 +8,10 @@ import 'package:flutter/widgets.dart';
 import 'pages/main_page.dart';
 import 'pages/simple/carousel_indicator.dart';
 import 'pages/simple/link.dart';
+import 'pages/simple/mainAxisAlignment.dart';
 import 'pages/simple/scroll_direction.dart';
 
-// ignore_for_file: prefer_const_literals_to_create_immutables,unused_local_variable,unused_import
+// ignore_for_file: prefer_const_literals_to_create_immutables
 FFRouteSettings getRouteSettings({
   @required String name,
   Map<String, dynamic> arguments,
@@ -26,6 +27,15 @@ FFRouteSettings getRouteSettings({
         routeName: 'CarouselIndicator',
         description: 'Carousel Indicator',
         exts: <String, dynamic>{'group': 'Simple', 'order': 2},
+      );
+    case 'fluttercandies://MainAxisAlignment':
+      return FFRouteSettings(
+        name: name,
+        arguments: arguments,
+        widget: MainAxisAlignmentDemo(),
+        routeName: 'MainAxisAlignment',
+        description: 'set MainAxisAlignment for ExtendedTabBar',
+        exts: <String, dynamic>{'group': 'Simple', 'order': 3},
       );
     case 'fluttercandies://demogrouppage':
       return FFRouteSettings(

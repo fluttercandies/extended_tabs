@@ -1,3 +1,6 @@
+## 2.2.0-non-null-safety
+
+* add [ExtendedTabBar.mainAxisAlignment].
 ## 2.1.0-non-null-safety
 
 * add indicator with carousel style.

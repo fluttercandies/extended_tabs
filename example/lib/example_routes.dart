@@ -4,6 +4,7 @@
 // **************************************************************************
 const List<String> routeNames = <String>[
   'fluttercandies://CarouselIndicator',
+  'fluttercandies://MainAxisAlignment',
   'fluttercandies://demogrouppage',
   'fluttercandies://link',
   'fluttercandies://mainpage',
@@ -24,6 +25,18 @@ class Routes {
   /// [exts] : {group: Simple, order: 2}
   static const String fluttercandiesCarouselIndicator =
       'fluttercandies://CarouselIndicator';
+
+  /// 'set MainAxisAlignment for ExtendedTab'
+  ///
+  /// [name] : 'fluttercandies://MainAxisAlignment'
+  ///
+  /// [routeName] : 'MainAxisAlignment'
+  ///
+  /// [description] : 'set MainAxisAlignment for ExtendedTab'
+  ///
+  /// [exts] : {group: Simple, order: 3}
+  static const String fluttercandiesMainAxisAlignment =
+      'fluttercandies://MainAxisAlignment';
 
   /// 'DemoGroupPage'
   ///

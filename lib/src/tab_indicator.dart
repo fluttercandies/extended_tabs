@@ -45,6 +45,7 @@ class ExtendedUnderlineTabIndicator extends Decoration {
     this.insets = EdgeInsets.zero,
     this.scrollDirection = Axis.horizontal,
     this.strokeCap = StrokeCap.square,
+    this.size,
   });
 
   /// The color and weight of the horizontal line drawn below the selected tab.
@@ -66,6 +67,11 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   /// Styles to use for line endings.
   final StrokeCap strokeCap;
 
+  /// if Axis.horizontal , it's width.
+  /// otherwise is height.
+  /// if null, it's base on Tab
+  final double? size;
+
   @override
   Decoration? lerpFrom(Decoration? a, double t) {
     if (a is ExtendedUnderlineTabIndicator) {
@@ -73,6 +79,7 @@ class ExtendedUnderlineTabIndicator extends Decoration {
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
         insets: EdgeInsetsGeometry.lerp(a.insets, insets, t)!,
         scrollDirection: a.scrollDirection,
+        size: a.size,
       );
     }
     return super.lerpFrom(a, t);
@@ -85,6 +92,7 @@ class ExtendedUnderlineTabIndicator extends Decoration {
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
         insets: EdgeInsetsGeometry.lerp(insets, b.insets, t)!,
         scrollDirection: b.scrollDirection,
+        size: b.size,
       );
     }
     return super.lerpTo(b, t);
@@ -98,21 +106,20 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   Rect _indicatorRectFor(
       Rect rect, TextDirection textDirection, Axis scrollDirection) {
     final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
-
     return scrollDirection == Axis.horizontal
         ? Rect.fromLTWH(
-            indicator.left,
+            indicator.left + (size != null ? (indicator.width - size!) / 2 : 0),
             indicator.bottom - borderSide.width,
-            indicator.width,
+            size ?? indicator.width,
             borderSide.width,
           )
         : Rect.fromLTWH(
             textDirection == TextDirection.rtl
                 ? indicator.left
                 : indicator.right - borderSide.width,
-            indicator.top,
+            indicator.top + (size != null ? (indicator.height - size!) / 2 : 0),
             borderSide.width,
-            indicator.height,
+            size ?? indicator.height,
           );
   }
 

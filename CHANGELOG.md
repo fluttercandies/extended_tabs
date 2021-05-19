@@ -1,3 +1,6 @@
+## 2.2.0
+
+* add [ExtendedTabBar.mainAxisAlignment].
 ## 2.1.0
 
 * add indicator with carousel style.

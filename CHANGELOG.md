@@ -1,3 +1,6 @@
+## 2.3.0-non-null-safety
+
+* add [ExtendedTabBarView.pageController] to support custom PageController().
 ## 2.2.0-non-null-safety
 
 * add [ExtendedTabBar.mainAxisAlignment].

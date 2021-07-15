@@ -46,6 +46,7 @@ class ExtendedTabBarView extends StatefulWidget {
     this.cacheExtent = 0,
     this.link = true,
     this.scrollDirection = Axis.horizontal,
+    this.pageController,
   }) : super(key: key);
 
   /// cache page count
@@ -89,6 +90,9 @@ class ExtendedTabBarView extends StatefulWidget {
   /// Defaults to [Axis.horizontal].
   final Axis scrollDirection;
 
+  /// The PageController inside, [PageController.initialPage] should the same as [TabController.initialIndex]
+  final PageController? pageController;
+
   @override
   _ExtendedTabBarViewState createState() => _ExtendedTabBarViewState();
 }
@@ -96,6 +100,7 @@ class ExtendedTabBarView extends StatefulWidget {
 class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
   TabController? _controller;
   PageController? _pageController;
+  PageController? get pageController => _pageController;
   _ExtendedTabBarViewState? _ancestor;
   _ExtendedTabBarViewState? _child;
   List<Widget>? _children;
@@ -160,7 +165,10 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView> {
     _updateAncestor();
     _updateTabController();
     _currentIndex = _controller?.index;
-    _pageController = PageController(initialPage: _currentIndex ?? 0);
+    final int currentIndex = _currentIndex ?? 0;
+    _pageController =
+        widget.pageController ?? PageController(initialPage: currentIndex);
+    assert(currentIndex == _pageController!.initialPage);
   }
 
   void _updateAncestor() {

@@ -1,6 +1,11 @@
+## 2.3.0
+
+* add [ExtendedTabBarView.pageController] to support custom PageController().
+
 ## 2.2.0
 
 * add [ExtendedTabBar.mainAxisAlignment].
+
 ## 2.1.0
 
 * add indicator with carousel style.

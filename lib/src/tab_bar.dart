@@ -490,7 +490,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     required TextDirection textDirection,
     required VerticalDirection verticalDirection,
     required this.onPerformLayout,
-  })   : assert(onPerformLayout != null),
+  })  : assert(onPerformLayout != null),
         super(
           children: children,
           direction: direction,
@@ -1250,6 +1250,7 @@ class ExtendedTab extends StatelessWidget {
     this.child,
     this.scrollDirection,
     this.size,
+    this.height,
   })  : assert(text != null || child != null || icon != null),
         assert(text == null || child == null),
         super(key: key);
@@ -1284,6 +1285,13 @@ class ExtendedTab extends StatelessWidget {
 
   final double? size;
 
+  /// The height of the [Tab].
+  ///
+  /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
+  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
+  /// height is 46.0 pixels.
+  final double? height;
+
   Widget _buildLabelText() {
     return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
   }
@@ -1292,16 +1300,16 @@ class ExtendedTab extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    double height;
+    final double calculatedHeight;
     Widget? label;
     if (icon == null) {
-      height = size ?? _kTabHeight;
+      calculatedHeight = size ?? _kTabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      height = size ?? _kTabHeight;
+      calculatedHeight = size ?? _kTabHeight;
       label = icon;
     } else {
-      height = size ?? _kTextAndIconTabHeight;
+      calculatedHeight = size ?? _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -1316,8 +1324,12 @@ class ExtendedTab extends StatelessWidget {
     }
 
     return SizedBox(
-      height: scrollDirection == Axis.horizontal ? height : null,
-      width: scrollDirection == Axis.horizontal ? null : height,
+      height: scrollDirection == Axis.horizontal
+          ? height ?? calculatedHeight
+          : null,
+      width: scrollDirection == Axis.horizontal
+          ? null
+          : height ?? calculatedHeight,
       child: Center(
         child: label,
         widthFactor: 1.0,

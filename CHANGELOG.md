@@ -1,3 +1,7 @@
+## 2.3.1
+
+* add [ExtendedTab.height]
+
 ## 2.3.0
 
 * add [ExtendedTabBarView.pageController] to support custom PageController().

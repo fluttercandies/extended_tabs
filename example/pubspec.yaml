@@ -15,7 +15,7 @@ dependencies:
   ff_annotation_route_library: ^3.0.0
   flutter:
     sdk: flutter    
-  url_launcher: any
+  url_launcher: 6.1.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -56,6 +56,7 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
           ),
           Expanded(
             child: ExtendedTabBarView(
+              shouldIgnorePointerWhenScrolling: false,
               children: <Widget>[
                 Column(
                   children: <Widget>[
@@ -71,6 +72,7 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
                     ),
                     Expanded(
                       child: ExtendedTabBarView(
+                        shouldIgnorePointerWhenScrolling: false,
                         children: <Widget>[
                           Column(
                             children: <Widget>[
@@ -89,6 +91,7 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: ExtendedTabBarView(
+                                  shouldIgnorePointerWhenScrolling: false,
                                   children: const <Widget>[
                                     ListWidget('Tab000'),
                                     ListWidget('Tab001'),

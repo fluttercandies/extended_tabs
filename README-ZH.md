@@ -21,6 +21,7 @@
     - [嵌套滚动](#嵌套滚动)
     - [滚动方向](#滚动方向)
     - [缓存大小](#缓存大小)
+    - [ShouldIgnorePointerWhenScrolling](#shouldignorepointerwhenscrolling)
   - [☕️Buy me a coffee](#️buy-me-a-coffee)
 
 ## 使用
@@ -133,6 +134,57 @@ dependencies:
       List("Tab003"),
     ],
     controller: tabController2,
+    cacheExtent: 1,
+  )  
+```
+
+### ShouldIgnorePointerWhenScrolling
+
+当 Scrollable 滚动未停止的时候，是默认阻止其内容获得 hittest， 这就会导致在快速切换 tab 的时候，
+给人一种不能马上操作内容的感觉。
+
+为了解决这个问题你可以通过下面2种方式来处理：
+
+1. 将 ShouldIgnorePointerWhenScrolling 设置成false，这样的话 Scrollable 在滚动中也不会阻止内容获得 hittest
+2. 可以设置 LessSpringClampingScrollPhysics 让滚动动画更快结束
+
+``` dart
+  /// Whether the contents of the widget should ignore [PointerEvent] inputs.
+  ///
+  /// Setting this value to true prevents the use from interacting with the
+  /// contents of the widget with pointer events. The widget itself is still
+  /// interactive.
+  ///
+  /// For example, if the scroll position is being driven by an animation, it
+  /// might be appropriate to set this value to ignore pointer events to
+  /// prevent the user from accidentally interacting with the contents of the
+  /// widget as it animates. The user will still be able to touch the widget,
+  /// potentially stopping the animation.
+  ///
+  ///
+  /// if true, child can't accept event before [ExtendedPageView],[ExtendedScrollable] stop scroll.
+  ///
+  ///
+  /// if false, child can accept event before [ExtendedPageView],[ExtendedScrollable] stop scroll.
+  /// notice: we don't know there are any issues if we don't ignore [PointerEvent] inputs when it's scrolling.
+  ///
+  ///
+  /// Two way to solve issue that child can't hittest before [PageView] stop scroll.
+  /// 1. set [shouldIgnorePointerWhenScrolling] false
+  /// 2. use LessSpringClampingScrollPhysics to make animation quickly
+  ///
+  /// default is true.
+  final bool shouldIgnorePointerWhenScrolling;
+  
+  ExtendedTabBarView(
+    children: <Widget>[
+      List("Tab000"),
+      List("Tab001"),
+      List("Tab002"),
+      List("Tab003"),
+    ],
+    controller: tabController2,
+    shouldIgnorePointerWhenScrolling: false,
     cacheExtent: 1,
   )  
 ```

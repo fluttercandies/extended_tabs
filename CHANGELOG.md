@@ -1,3 +1,8 @@
+## 3.0.0
+
+* add [ExtendedTabBarView.shouldIgnorePointerWhenScrolling] to scroll tabs more smoothly
+* link implements with SyncScrollStateMinxin 
+
 ## 2.3.1
 
 * add [ExtendedTab.height]

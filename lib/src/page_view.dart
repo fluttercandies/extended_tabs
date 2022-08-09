@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+import 'scrollable.dart';
 
 // Having this global (mutable) page controller is a bit of a hack. We need it
 // to plumb in the factory for _PagePosition, but it will end up accumulating
@@ -59,6 +61,7 @@ class ExtendedPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
+    this.shouldIgnorePointerWhenScrolling = true,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
         super(key: key);
@@ -90,6 +93,7 @@ class ExtendedPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
+    this.shouldIgnorePointerWhenScrolling = true,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
@@ -111,6 +115,7 @@ class ExtendedPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.cacheExtent = 0,
+    this.shouldIgnorePointerWhenScrolling = true,
   })  : controller = controller ?? _defaultPageController,
         super(key: key);
 
@@ -191,6 +196,8 @@ class ExtendedPageView extends StatefulWidget {
   /// if cacheExtent is 1, it has two pages in cache
   /// null is infinity, it will cache all pages
   final int cacheExtent;
+
+  final bool shouldIgnorePointerWhenScrolling;
   @override
   _ExtendedPageViewState createState() => _ExtendedPageViewState();
 }
@@ -242,12 +249,14 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         }
         return false;
       },
-      child: Scrollable(
+      child: ExtendedScrollable(
         dragStartBehavior: widget.dragStartBehavior,
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
+        shouldIgnorePointerWhenScrolling:
+            widget.shouldIgnorePointerWhenScrolling,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           if (widget.cacheExtent > 0) {
             return LayoutBuilder(

@@ -297,7 +297,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
     if (notification is ScrollUpdateNotification &&
         !_controller!.indexIsChanging) {
       if ((_pageController.page! - _controller!.index).abs() > 1.0) {
-        _controller!.index = _pageController.page!.floor();
+        _controller!.index = _pageController.page!.round();
         _currentIndex = _controller!.index;
       }
       _controller!.offset =
@@ -383,4 +383,7 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
 
   @override
   SyncControllerMixin get syncController => _pageController;
+
+  @override
+  TextDirection? get textDirection => Directionality.maybeOf(context);
 }

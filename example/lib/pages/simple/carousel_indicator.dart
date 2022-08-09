@@ -57,7 +57,7 @@ class _CarouselIndicatorDemoState extends State<CarouselIndicatorDemo>
                 selectedColor: Colors.white,
                 unselectedColor: Colors.grey,
                 strokeCap: StrokeCap.round,
-                indicatorPadding: const EdgeInsets.all(5),
+                indicatorPadding: const EdgeInsets.all(20),
               ),
             ),
           ],

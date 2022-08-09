@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -77,6 +78,8 @@ class _IndicatorPainter extends CustomPainter {
     required this.indicator,
     required this.indicatorSize,
     required this.tabKeys,
+    required this.indicatorPadding,
+    required this.labelPadding,
     _IndicatorPainter? old,
     this.scrollDirection,
     this.mainAxisAlignment,
@@ -91,7 +94,8 @@ class _IndicatorPainter extends CustomPainter {
   final List<GlobalKey>? tabKeys;
   final Axis? scrollDirection;
   final MainAxisAlignment? mainAxisAlignment;
-
+  final EdgeInsetsGeometry indicatorPadding;
+  final EdgeInsetsGeometry? labelPadding;
   List<double>? _currentTabOffsets;
   late TextDirection _currentTextDirection;
   Rect? _currentRect;
@@ -144,24 +148,39 @@ class _IndicatorPainter extends CustomPainter {
         ? tabKeys![tabIndex].currentContext!.size!.width
         : tabKeys![tabIndex].currentContext!.size!.height;
 
+    final Function handleLabel = () {
+      if (indicatorSize == TabBarIndicatorSize.label) {
+        final EdgeInsets insets =
+            (labelPadding ?? EdgeInsets.zero).resolve(_currentTextDirection);
+        tabRight -=
+            scrollDirection == Axis.horizontal ? insets.right : insets.bottom;
+        tabLeft +=
+            scrollDirection == Axis.horizontal ? insets.left : insets.top;
+      }
+    };
+
     switch (mainAxisAlignment) {
       case MainAxisAlignment.start:
         if (_currentTextDirection == TextDirection.ltr &&
             tabIndex == maxTabIndex) {
-          tabRight = tabLeft + tabWidth;
+          tabRight = tabLeft + tabWidth + _getLabelPadding();
         }
+
+        handleLabel();
         break;
       case MainAxisAlignment.end:
         if (_currentTextDirection == TextDirection.rtl && tabIndex == 0) {
-          tabRight = tabLeft + tabWidth;
+          tabRight = tabLeft + tabWidth + _getLabelPadding();
         }
+        handleLabel();
         break;
       case MainAxisAlignment.center:
         if ((_currentTextDirection == TextDirection.ltr &&
                 tabIndex == maxTabIndex) ||
             (_currentTextDirection == TextDirection.rtl && tabIndex == 0)) {
-          tabRight = tabLeft + tabWidth;
+          tabRight = tabLeft + tabWidth + _getLabelPadding();
         }
+        handleLabel();
         break;
       case MainAxisAlignment.spaceBetween:
       case MainAxisAlignment.spaceAround:
@@ -169,7 +188,8 @@ class _IndicatorPainter extends CustomPainter {
         if (indicatorSize == TabBarIndicatorSize.label) {
           tabRight = tabLeft + tabWidth;
         } else {
-          double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
+          double delta =
+              ((tabRight - tabLeft) - tabWidth - _getLabelPadding()) / 2.0;
           tabRight -= delta;
 
           switch (mainAxisAlignment) {
@@ -215,14 +235,50 @@ class _IndicatorPainter extends CustomPainter {
         }
         break;
       default:
-        final double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
-        tabLeft += delta;
-        tabRight -= delta;
-    }
+        if (indicatorSize == TabBarIndicatorSize.label) {
+          if (labelPadding != null) {
+            final EdgeInsets edgeInsets =
+                labelPadding!.resolve(_currentTextDirection);
 
-    return scrollDirection == Axis.horizontal
+            final double delta =
+                ((tabRight - tabLeft) - (tabWidth + _getLabelPadding())) / 2.0;
+            tabLeft += delta;
+            tabLeft += scrollDirection == Axis.horizontal
+                ? edgeInsets.left
+                : edgeInsets.top;
+            tabRight = tabLeft + tabWidth;
+          } else {
+            final double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
+            tabLeft += delta;
+            tabRight -= delta;
+          }
+        }
+    }
+    final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
+
+    final Rect rect = scrollDirection == Axis.horizontal
         ? Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height)
         : Rect.fromLTWH(0, tabLeft, tabBarSize.width, tabRight - tabLeft);
+
+    if (!(rect.size >= insets.collapsedSize)) {
+      throw FlutterError(
+        'indicatorPadding insets should be less than Tab Size\n'
+        'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
+      );
+    }
+
+    return insets.deflateRect(rect);
+  }
+
+  double _getLabelPadding() {
+    if (labelPadding != null) {
+      final EdgeInsets edgeInsets =
+          labelPadding!.resolve(_currentTextDirection);
+      return scrollDirection == Axis.horizontal
+          ? edgeInsets.horizontal
+          : edgeInsets.vertical;
+    }
+    return 0;
   }
 
   @override
@@ -802,14 +858,30 @@ class ExtendedTabBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize {
+    double maxHeight = _kTabHeight;
     for (final Widget item in tabs) {
-      if (item is Tab) {
-        final Tab tab = item;
-        if ((tab.text != null || tab.child != null) && tab.icon != null)
-          return Size.fromHeight(_kTextAndIconTabHeight + indicatorWeight);
+      if (item is PreferredSizeWidget) {
+        final double itemHeight = item.preferredSize.height;
+        maxHeight = max(itemHeight, maxHeight);
       }
     }
-    return Size.fromHeight(_kTabHeight + indicatorWeight);
+    return Size.fromHeight(maxHeight + indicatorWeight);
+  }
+
+  /// Returns whether the [TabBar] contains a tab with both text and icon.
+  ///
+  /// [TabBar] uses this to give uniform padding to all tabs in cases where
+  /// there are some tabs with both text and icon and some which contain only
+  /// text or icon.
+  bool get tabHasTextAndIcon {
+    for (final Widget item in tabs) {
+      if (item is PreferredSizeWidget) {
+        if (item.preferredSize.height == _kTextAndIconTabHeight) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @override
@@ -919,6 +991,8 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
             old: _indicatorPainter,
             scrollDirection: widget.scrollDirection,
             mainAxisAlignment: widget.mainAxisAlignment,
+            indicatorPadding: widget.indicatorPadding,
+            labelPadding: widget.labelPadding,
           );
   }
 
@@ -1104,21 +1178,41 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
 
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
-    final List<Widget> wrappedTabs = <Widget>[
-      for (int i = 0; i < widget.tabs.length; i += 1)
-        Center(
-          heightFactor: 1.0,
-          child: Padding(
-            padding: widget.labelPadding ??
-                tabBarTheme.labelPadding ??
-                kTabLabelPadding,
-            child: KeyedSubtree(
-              key: _tabKeys[i],
-              child: widget.tabs[i],
-            ),
+    final List<Widget> wrappedTabs =
+        List<Widget>.generate(widget.tabs.length, (int index) {
+      const double verticalAdjustment =
+          (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
+      EdgeInsetsGeometry? adjustedPadding;
+
+      if (widget.tabs[index] is PreferredSizeWidget) {
+        final PreferredSizeWidget tab =
+            widget.tabs[index] as PreferredSizeWidget;
+        if (widget.tabHasTextAndIcon &&
+            tab.preferredSize.height == _kTabHeight) {
+          if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
+            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!)
+                .add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
+          } else {
+            adjustedPadding = const EdgeInsets.symmetric(
+                vertical: verticalAdjustment, horizontal: 16.0);
+          }
+        }
+      }
+
+      return Center(
+        heightFactor: 1.0,
+        child: Padding(
+          padding: adjustedPadding ??
+              widget.labelPadding ??
+              tabBarTheme.labelPadding ??
+              kTabLabelPadding,
+          child: KeyedSubtree(
+            key: _tabKeys[index],
+            child: widget.tabs[index],
           ),
-        )
-    ];
+        ),
+      );
+    });
 
     // If the controller was provided by DefaultTabController and we're part
     // of a Hero (typically the AppBar), then we will not be able to find the

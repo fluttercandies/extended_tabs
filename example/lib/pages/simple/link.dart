@@ -107,7 +107,6 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
                                   /// cache page count
                                   /// default is 0.
                                   /// if cacheExtent is 1, it has two pages in cache
-                                  /// null is infinity, it will cache all pages
                                   cacheExtent: 1,
                                 ),
                               )

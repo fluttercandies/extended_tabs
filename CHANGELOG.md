@@ -1,3 +1,9 @@
+## 3.0.1
+
+* link support TextDirection.rtl #24
+* Indicator render error #23
+* update official code #21
+
 ## 3.0.0
 
 * add [ExtendedTabBarView.shouldIgnorePointerWhenScrolling] to scroll tabs more smoothly

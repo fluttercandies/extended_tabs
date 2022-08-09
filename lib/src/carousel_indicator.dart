@@ -99,7 +99,7 @@ class _TabBar extends ExtendedTabBar {
           tabs: tabs,
           controller: controller,
           isScrollable: false,
-          indicatorPadding: indicatorPadding,
+          //indicatorPadding: indicatorPadding,
           indicator: indicator,
           labelPadding: indicatorPadding,
           indicatorSize: TabBarIndicatorSize.label,

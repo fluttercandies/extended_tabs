@@ -1,3 +1,7 @@
+## 3.0.2
+
+* slove sync issue
+
 ## 3.0.1
 
 * link support TextDirection.rtl #24

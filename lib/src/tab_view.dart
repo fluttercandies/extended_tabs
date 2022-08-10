@@ -383,7 +383,4 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
 
   @override
   SyncControllerMixin get syncController => _pageController;
-
-  @override
-  TextDirection? get textDirection => Directionality.maybeOf(context);
 }

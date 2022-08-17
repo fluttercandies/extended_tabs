@@ -79,7 +79,6 @@ class _IndicatorPainter extends CustomPainter {
     required this.indicatorSize,
     required this.tabKeys,
     required this.indicatorPadding,
-    required this.labelPadding,
     _IndicatorPainter? old,
     this.scrollDirection,
     this.mainAxisAlignment,
@@ -95,7 +94,6 @@ class _IndicatorPainter extends CustomPainter {
   final Axis? scrollDirection;
   final MainAxisAlignment? mainAxisAlignment;
   final EdgeInsetsGeometry indicatorPadding;
-  final EdgeInsetsGeometry? labelPadding;
   List<double>? _currentTabOffsets;
   late TextDirection _currentTextDirection;
   Rect? _currentRect;
@@ -150,12 +148,18 @@ class _IndicatorPainter extends CustomPainter {
 
     final Function handleLabel = () {
       if (indicatorSize == TabBarIndicatorSize.label) {
-        final EdgeInsets insets =
-            (labelPadding ?? EdgeInsets.zero).resolve(_currentTextDirection);
-        tabRight -=
-            scrollDirection == Axis.horizontal ? insets.right : insets.bottom;
-        tabLeft +=
-            scrollDirection == Axis.horizontal ? insets.left : insets.top;
+        final EdgeInsetsGeometry labelPadding = tabKeys![tabIndex]
+            .currentContext!
+            .findAncestorRenderObjectOfType<RenderPadding>()!
+            .padding;
+        final EdgeInsets edgeInsets =
+            labelPadding.resolve(_currentTextDirection);
+        tabRight -= scrollDirection == Axis.horizontal
+            ? edgeInsets.right
+            : edgeInsets.bottom;
+        tabLeft += scrollDirection == Axis.horizontal
+            ? edgeInsets.left
+            : edgeInsets.top;
       }
     };
 
@@ -163,14 +167,14 @@ class _IndicatorPainter extends CustomPainter {
       case MainAxisAlignment.start:
         if (_currentTextDirection == TextDirection.ltr &&
             tabIndex == maxTabIndex) {
-          tabRight = tabLeft + tabWidth + _getLabelPadding();
+          tabRight = tabLeft + tabWidth + _getLabelPadding(tabIndex);
         }
 
         handleLabel();
         break;
       case MainAxisAlignment.end:
         if (_currentTextDirection == TextDirection.rtl && tabIndex == 0) {
-          tabRight = tabLeft + tabWidth + _getLabelPadding();
+          tabRight = tabLeft + tabWidth + _getLabelPadding(tabIndex);
         }
         handleLabel();
         break;
@@ -178,7 +182,7 @@ class _IndicatorPainter extends CustomPainter {
         if ((_currentTextDirection == TextDirection.ltr &&
                 tabIndex == maxTabIndex) ||
             (_currentTextDirection == TextDirection.rtl && tabIndex == 0)) {
-          tabRight = tabLeft + tabWidth + _getLabelPadding();
+          tabRight = tabLeft + tabWidth + _getLabelPadding(tabIndex);
         }
         handleLabel();
         break;
@@ -189,7 +193,8 @@ class _IndicatorPainter extends CustomPainter {
           tabRight = tabLeft + tabWidth;
         } else {
           double delta =
-              ((tabRight - tabLeft) - tabWidth - _getLabelPadding()) / 2.0;
+              ((tabRight - tabLeft) - tabWidth - _getLabelPadding(tabIndex)) /
+                  2.0;
           tabRight -= delta;
 
           switch (mainAxisAlignment) {
@@ -236,22 +241,15 @@ class _IndicatorPainter extends CustomPainter {
         break;
       default:
         if (indicatorSize == TabBarIndicatorSize.label) {
-          if (labelPadding != null) {
-            final EdgeInsets edgeInsets =
-                labelPadding!.resolve(_currentTextDirection);
-
-            final double delta =
-                ((tabRight - tabLeft) - (tabWidth + _getLabelPadding())) / 2.0;
-            tabLeft += delta;
-            tabLeft += scrollDirection == Axis.horizontal
-                ? edgeInsets.left
-                : edgeInsets.top;
-            tabRight = tabLeft + tabWidth;
-          } else {
-            final double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
-            tabLeft += delta;
-            tabRight -= delta;
-          }
+          final EdgeInsetsGeometry labelPadding = tabKeys![tabIndex]
+              .currentContext!
+              .findAncestorRenderObjectOfType<RenderPadding>()!
+              .padding;
+          final EdgeInsets insets = labelPadding.resolve(_currentTextDirection);
+          final double delta =
+              ((tabRight - tabLeft) - (tabWidth + insets.horizontal)) / 2.0;
+          tabLeft += delta + insets.left;
+          tabRight = tabLeft + tabWidth;
         }
     }
     final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
@@ -270,15 +268,15 @@ class _IndicatorPainter extends CustomPainter {
     return insets.deflateRect(rect);
   }
 
-  double _getLabelPadding() {
-    if (labelPadding != null) {
-      final EdgeInsets edgeInsets =
-          labelPadding!.resolve(_currentTextDirection);
-      return scrollDirection == Axis.horizontal
-          ? edgeInsets.horizontal
-          : edgeInsets.vertical;
-    }
-    return 0;
+  double _getLabelPadding(int tabIndex) {
+    final EdgeInsetsGeometry labelPadding = tabKeys![tabIndex]
+        .currentContext!
+        .findAncestorRenderObjectOfType<RenderPadding>()!
+        .padding;
+    final EdgeInsets edgeInsets = labelPadding.resolve(_currentTextDirection);
+    return scrollDirection == Axis.horizontal
+        ? edgeInsets.horizontal
+        : edgeInsets.vertical;
   }
 
   @override
@@ -992,7 +990,6 @@ class _ExtendedTabBarState extends State<ExtendedTabBar> {
             scrollDirection: widget.scrollDirection,
             mainAxisAlignment: widget.mainAxisAlignment,
             indicatorPadding: widget.indicatorPadding,
-            labelPadding: widget.labelPadding,
           );
   }
 

@@ -1,3 +1,7 @@
+## 3.0.3
+
+* handle label padding in common way
+
 ## 3.0.2
 
 * slove sync issue

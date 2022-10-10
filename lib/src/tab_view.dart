@@ -39,6 +39,7 @@ class ExtendedTabBarView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.pageController,
     this.shouldIgnorePointerWhenScrolling = true,
+    this.viewportFraction = 1.0,
   }) : super(key: key);
 
   /// cache page count
@@ -83,7 +84,7 @@ class ExtendedTabBarView extends StatefulWidget {
   final Axis scrollDirection;
 
   /// The PageController inside, [PageController.initialPage] should the same as [TabController.initialIndex]
-  final SyncPageController? pageController;
+  final LinkPageController? pageController;
 
   /// Whether the contents of the widget should ignore [PointerEvent] inputs.
   ///
@@ -112,20 +113,16 @@ class ExtendedTabBarView extends StatefulWidget {
   /// default is true.
   final bool shouldIgnorePointerWhenScrolling;
 
-  static void linkParent(BuildContext context, SyncControllerMixin child) {
-    child.linkParent<ExtendedTabBarView, _ExtendedTabBarViewState>(context);
-  }
+  /// {@macro flutter.widgets.pageview.viewportFraction}
+  final double viewportFraction;
 
   @override
-  _ExtendedTabBarViewState createState() => _ExtendedTabBarViewState();
+  ExtendedTabBarViewState createState() => ExtendedTabBarViewState();
 }
 
-class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
-    with SyncScrollStateMinxin<ExtendedTabBarView> {
+class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
   TabController? _controller;
-  late SyncPageController _pageController;
-  // _ExtendedTabBarViewState? _ancestor;
-  // _ExtendedTabBarViewState? _child;
+  late LinkPageController _pageController;
   List<Widget>? _children;
   List<Widget>? _childrenWithKey;
   int? _currentIndex;
@@ -176,41 +173,50 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
 
   @override
   void didChangeDependencies() {
+    _updateTabController();
+    _currentIndex = _controller!.index;
+    _pageController = widget.pageController ??
+        LinkPageController(
+          initialPage: _currentIndex ?? 0,
+          viewportFraction: widget.viewportFraction,
+        );
     super.didChangeDependencies();
 
-    _updateTabController();
-    _currentIndex = _controller?.index;
-    final int currentIndex = _currentIndex ?? 0;
-    _pageController =
-        widget.pageController ?? SyncPageController(initialPage: currentIndex);
-    _updateAncestor();
-    updatePhysics();
-    _initGestureRecognizers();
-
-    assert(currentIndex == _pageController.initialPage);
+    assert(_currentIndex == _pageController.initialPage);
   }
 
-  void _updateAncestor() {
-    _pageController.unlinkParent();
-    if (widget.link) {
-      ExtendedTabBarView.linkParent(context, _pageController);
-    }
+  @override
+  void linkParent<S extends StatefulWidget, T extends LinkScrollState<S>>() {
+    super.linkParent<ExtendedTabBarView, ExtendedTabBarViewState>();
   }
 
   @override
   void didUpdateWidget(ExtendedTabBarView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateAncestor();
     if (widget.controller != oldWidget.controller) {
       _updateTabController();
+      _currentIndex = _controller?.index;
     }
+    if ((widget.pageController != null &&
+            widget.pageController != oldWidget.pageController) ||
+        widget.viewportFraction != oldWidget.viewportFraction) {
+      _pageController = widget.pageController ??
+          LinkPageController(
+            initialPage: _currentIndex ?? 0,
+            viewportFraction: widget.viewportFraction,
+          );
+    }
+
     if (widget.physics != oldWidget.physics) {
       updatePhysics();
     }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
 
-    _initGestureRecognizers(oldWidget);
+    if (oldWidget.scrollDirection != widget.scrollDirection ||
+        oldWidget.physics != widget.physics) {
+      initGestureRecognizers();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -367,14 +373,6 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
     return buildGestureDetector(child: result);
   }
 
-  void _initGestureRecognizers([ExtendedTabBarView? oldWidget]) {
-    if (oldWidget == null ||
-        oldWidget.scrollDirection != widget.scrollDirection ||
-        oldWidget.physics != widget.physics) {
-      initGestureRecognizers();
-    }
-  }
-
   @override
   ScrollPhysics? get physics => widget.physics;
 
@@ -382,5 +380,8 @@ class _ExtendedTabBarViewState extends State<ExtendedTabBarView>
   Axis get scrollDirection => widget.scrollDirection;
 
   @override
-  SyncControllerMixin get syncController => _pageController;
+  LinkScrollControllerMixin get linkScrollController => _pageController;
+
+  @override
+  bool get link => widget.link;
 }

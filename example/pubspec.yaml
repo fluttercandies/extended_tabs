@@ -20,6 +20,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+dependency_overrides:
+
 flutter:
 
   # The following line ensures that the Material Icons font is

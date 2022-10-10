@@ -1,3 +1,9 @@
+## 4.0.0
+
+* refactor code (sync_scroll_library)
+* breaking change: SyncPageController to LinkPageController
+* add viewportFraction property
+
 ## 3.0.3
 
 * handle label padding in common way

@@ -1,6 +1,6 @@
 name: extended_tabs
 description: A powerful official extension library of Tab/TabBar/TabView, which support to scroll ancestor or child Tabs when current is overscroll, and set scroll direction and cache extent.
-version: 4.0.0
+version: 4.0.1
 homepage: https://github.com/fluttercandies/extended_tabs
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sync_scroll_library: ^1.0.0
+  sync_scroll_library: ^1.0.1
 
 dev_dependencies:
   flutter_test:

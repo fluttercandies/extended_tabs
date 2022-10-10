@@ -1,3 +1,7 @@
+## 4.0.1
+
+* fix simulation scroll is not sync (sync_scroll_library)
+
 ## 4.0.0
 
 * refactor code (sync_scroll_library)

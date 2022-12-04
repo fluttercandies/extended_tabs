@@ -258,44 +258,26 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         shouldIgnorePointerWhenScrolling:
             widget.shouldIgnorePointerWhenScrolling,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
-          if (widget.cacheExtent > 0) {
-            return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints boxConstraints) {
-              final Axis axis = axisDirectionToAxis(axisDirection);
-              return _createViewport(
-                axisDirection,
-                position,
-                widget.cacheExtent *
-                    (axis == Axis.horizontal
-                        ? boxConstraints.maxWidth
-                        : boxConstraints.maxHeight),
-              );
-            });
-          } else {
-            return _createViewport(axisDirection, position, null);
-          }
+          return Viewport(
+            // TODO(dnfield): we should provide a way to set cacheExtent
+            // independent of implicit scrolling:
+            // https://github.com/flutter/flutter/issues/45632
+            cacheExtent: widget.cacheExtent > 0
+                ? widget.cacheExtent.toDouble()
+                : (widget.allowImplicitScrolling ? 1.0 : 0.0),
+            cacheExtentStyle: CacheExtentStyle.viewport,
+            axisDirection: axisDirection,
+            offset: position,
+            clipBehavior: widget.clipBehavior,
+            slivers: <Widget>[
+              SliverFillViewport(
+                viewportFraction: widget.controller.viewportFraction,
+                delegate: widget.childrenDelegate,
+              ),
+            ],
+          );
         },
       ),
-    );
-  }
-
-  Viewport _createViewport(AxisDirection axisDirection, ViewportOffset position,
-      double? cacheExtent) {
-    return Viewport(
-      // TODO(dnfield): we should provide a way to set cacheExtent
-      // independent of implicit scrolling:
-      // https://github.com/flutter/flutter/issues/45632
-      cacheExtent: cacheExtent ?? (widget.allowImplicitScrolling ? 1.0 : 0.0),
-      cacheExtentStyle: CacheExtentStyle.viewport,
-      axisDirection: axisDirection,
-      offset: position,
-      clipBehavior: widget.clipBehavior,
-      slivers: <Widget>[
-        SliverFillViewport(
-          viewportFraction: widget.controller.viewportFraction,
-          delegate: widget.childrenDelegate,
-        ),
-      ],
     );
   }
 

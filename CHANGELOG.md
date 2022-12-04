@@ -1,3 +1,7 @@
+## 4.0.2
+
+* fix cacheExtent for ExtendedPageView
+
 ## 4.0.1
 
 * fix simulation scroll is not sync (sync_scroll_library)

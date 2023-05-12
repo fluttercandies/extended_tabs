@@ -1,3 +1,7 @@
+## 4.1.0
+
+* Migrate to Flutter 3.10.0
+
 ## 4.0.2
 
 * fix cacheExtent for ExtendedPageView

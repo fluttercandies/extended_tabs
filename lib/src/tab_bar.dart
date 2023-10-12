@@ -95,7 +95,7 @@ class _IndicatorPainter extends CustomPainter {
   final MainAxisAlignment? mainAxisAlignment;
   final EdgeInsetsGeometry indicatorPadding;
   List<double>? _currentTabOffsets;
-  late TextDirection _currentTextDirection;
+  TextDirection _currentTextDirection = TextDirection.ltr;
   Rect? _currentRect;
   BoxPainter? _painter;
   bool _needsPaint = false;

@@ -6,6 +6,8 @@ import 'example_routes.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -26,10 +28,11 @@ class MyApp extends StatelessWidget {
               return ffRouteSettings;
             }
             return ffRouteSettings.copyWith(
-                builder: () => CommonWidget(
-                      child: ffRouteSettings.builder(),
-                      title: ffRouteSettings.routeName,
-                    ));
+              builder: () => CommonWidget(
+                title: ffRouteSettings.routeName,
+                child: ffRouteSettings.builder(),
+              ),
+            );
           },
         );
       },
@@ -39,9 +42,11 @@ class MyApp extends StatelessWidget {
 
 class CommonWidget extends StatelessWidget {
   const CommonWidget({
+    Key? key,
     this.child,
     this.title,
-  });
+  }) : super(key: key);
+
   final Widget? child;
   final String? title;
 

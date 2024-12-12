@@ -12,13 +12,16 @@ import 'package:flutter/material.dart';
   },
 )
 class CarouselIndicatorDemo extends StatefulWidget {
+  const CarouselIndicatorDemo({Key? key}) : super(key: key);
+
   @override
-  _CarouselIndicatorDemoState createState() => _CarouselIndicatorDemoState();
+  State<CarouselIndicatorDemo> createState() => _CarouselIndicatorDemoState();
 }
 
 class _CarouselIndicatorDemoState extends State<CarouselIndicatorDemo>
     with SingleTickerProviderStateMixin {
   late TabController _controller;
+
   @override
   void initState() {
     super.initState();
@@ -40,16 +43,17 @@ class _CarouselIndicatorDemoState extends State<CarouselIndicatorDemo>
         child: Column(
           children: <Widget>[
             Expanded(
-                child: ExtendedTabBarView(
-              controller: _controller,
-              children: <Widget>[
-                Container(color: Colors.red),
-                Container(color: Colors.green),
-                Container(color: Colors.blue),
-                Container(color: Colors.yellow),
-                Container(color: Colors.purple),
-              ],
-            )),
+              child: ExtendedTabBarView(
+                controller: _controller,
+                children: <Widget>[
+                  Container(color: Colors.red),
+                  Container(color: Colors.green),
+                  Container(color: Colors.blue),
+                  Container(color: Colors.yellow),
+                  Container(color: Colors.purple),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: CarouselIndicator(

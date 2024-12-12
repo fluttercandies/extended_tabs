@@ -12,7 +12,7 @@ import 'scrollable.dart';
 // to plumb in the factory for _PagePosition, but it will end up accumulating
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
-final PageController _defaultPageController = PageController();
+final _defaultPageController = PageController();
 const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
@@ -198,8 +198,9 @@ class ExtendedPageView extends StatefulWidget {
   final int cacheExtent;
 
   final bool shouldIgnorePointerWhenScrolling;
+
   @override
-  _ExtendedPageViewState createState() => _ExtendedPageViewState();
+  State<ExtendedPageView> createState() => _ExtendedPageViewState();
 }
 
 class _ExtendedPageViewState extends State<ExtendedPageView> {
@@ -215,9 +216,8 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection =
-            textDirectionToAxisDirection(textDirection);
+        final textDirection = Directionality.of(context);
+        final axisDirection = textDirectionToAxisDirection(textDirection);
         return widget.reverse
             ? flipAxisDirection(axisDirection)
             : axisDirection;
@@ -228,20 +228,22 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
+    final axisDirection = _getDirection(context);
+    final physics = _ForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics)
-        : widget.physics);
+    ).applyTo(
+      widget.pageSnapping
+          ? _kPagePhysics.applyTo(widget.physics)
+          : widget.physics,
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification.depth == 0 &&
             widget.onPageChanged != null &&
             notification is ScrollUpdateNotification) {
-          final PageMetrics metrics = notification.metrics as PageMetrics;
-          final int currentPage = metrics.page!.round();
+          final metrics = notification.metrics as PageMetrics;
+          final currentPage = metrics.page!.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;
             widget.onPageChanged!(currentPage);
@@ -287,18 +289,36 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
     description
         .add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
     description.add(
-        FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
-    description.add(DiagnosticsProperty<PageController>(
-        'controller', widget.controller,
-        showName: false));
-    description.add(DiagnosticsProperty<ScrollPhysics>(
-        'physics', widget.physics,
-        showName: false));
-    description.add(FlagProperty('pageSnapping',
-        value: widget.pageSnapping, ifFalse: 'snapping disabled'));
-    description.add(FlagProperty('allowImplicitScrolling',
+      FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'),
+    );
+    description.add(
+      DiagnosticsProperty<PageController>(
+        'controller',
+        widget.controller,
+        showName: false,
+      ),
+    );
+    description.add(
+      DiagnosticsProperty<ScrollPhysics>(
+        'physics',
+        widget.physics,
+        showName: false,
+      ),
+    );
+    description.add(
+      FlagProperty(
+        'pageSnapping',
+        value: widget.pageSnapping,
+        ifFalse: 'snapping disabled',
+      ),
+    );
+    description.add(
+      FlagProperty(
+        'allowImplicitScrolling',
         value: widget.allowImplicitScrolling,
-        ifTrue: 'allow implicit scrolling'));
+        ifTrue: 'allow implicit scrolling',
+      ),
+    );
   }
 }
 

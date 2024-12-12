@@ -12,8 +12,10 @@ import 'package:flutter/material.dart';
   },
 )
 class MainAxisAlignmentDemo extends StatefulWidget {
+  const MainAxisAlignmentDemo({Key? key}) : super(key: key);
+
   @override
-  _MainAxisAlignmentDemoState createState() => _MainAxisAlignmentDemoState();
+  State<MainAxisAlignmentDemo> createState() => _MainAxisAlignmentDemoState();
 }
 
 class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
@@ -22,6 +24,7 @@ class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
   TextDirection _textDirection = TextDirection.ltr;
   MainAxisAlignment _mainAxisAlignment = MainAxisAlignment.spaceBetween;
   TabBarIndicatorSize _tabBarIndicatorSize = TabBarIndicatorSize.label;
+
   @override
   void initState() {
     super.initState();
@@ -42,11 +45,13 @@ class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
         children: <Widget>[
           DropdownButton<TextDirection>(
             items: TextDirection.values
-                .map((TextDirection textDirection) =>
-                    DropdownMenuItem<TextDirection>(
-                      child: Text(textDirection.toString()),
-                      value: textDirection,
-                    ))
+                .map(
+                  (TextDirection textDirection) =>
+                      DropdownMenuItem<TextDirection>(
+                    value: textDirection,
+                    child: Text(textDirection.toString()),
+                  ),
+                )
                 .toList(),
             value: _textDirection,
             onChanged: (TextDirection? textDirection) {
@@ -57,11 +62,13 @@ class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
           ),
           DropdownButton<MainAxisAlignment>(
             items: MainAxisAlignment.values
-                .map((MainAxisAlignment mainAxisAlignment) =>
-                    DropdownMenuItem<MainAxisAlignment>(
-                      child: Text(mainAxisAlignment.toString()),
-                      value: mainAxisAlignment,
-                    ))
+                .map(
+                  (MainAxisAlignment mainAxisAlignment) =>
+                      DropdownMenuItem<MainAxisAlignment>(
+                    value: mainAxisAlignment,
+                    child: Text(mainAxisAlignment.toString()),
+                  ),
+                )
                 .toList(),
             value: _mainAxisAlignment,
             onChanged: (MainAxisAlignment? mainAxisAlignment) {
@@ -72,11 +79,13 @@ class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
           ),
           DropdownButton<TabBarIndicatorSize>(
             items: TabBarIndicatorSize.values
-                .map((TabBarIndicatorSize tabBarIndicatorSize) =>
-                    DropdownMenuItem<TabBarIndicatorSize>(
-                      child: Text(tabBarIndicatorSize.toString()),
-                      value: tabBarIndicatorSize,
-                    ))
+                .map(
+                  (tabBarIndicatorSize) =>
+                      DropdownMenuItem<TabBarIndicatorSize>(
+                    value: tabBarIndicatorSize,
+                    child: Text(tabBarIndicatorSize.toString()),
+                  ),
+                )
                 .toList(),
             value: _tabBarIndicatorSize,
             onChanged: (TabBarIndicatorSize? tabBarIndicatorSize) {
@@ -108,10 +117,11 @@ class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: ExtendedTabBar(
               tabs: List<Widget>.generate(
-                  _controller.length,
-                  (int index) => Tab(
-                        text: 'Tab$index',
-                      )).toList(),
+                _controller.length,
+                (int index) => Tab(
+                  text: 'Tab$index',
+                ),
+              ).toList(),
               controller: _controller,
               labelPadding: EdgeInsets.zero,
               labelColor: Colors.blue,
@@ -119,28 +129,32 @@ class _MainAxisAlignmentDemoState extends State<MainAxisAlignmentDemo>
               indicatorSize: _tabBarIndicatorSize,
               mainAxisAlignment: _mainAxisAlignment,
               indicator: const ExtendedUnderlineTabIndicator(
-                  //size: 31,
-                  borderSide: BorderSide(
-                color: Colors.red,
-                width: 1,
-              )),
+                //size: 31,
+                borderSide: BorderSide(
+                  color: Colors.red,
+                  width: 1,
+                ),
+              ),
             ),
           ),
           Expanded(
             child: TabBarView(
-                controller: _controller,
-                children: List<Widget>.generate(
-                    _controller.length,
-                    (int index) => Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.red)),
-                          margin: const EdgeInsets.all(
-                            15,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text('I\'m tab $index'),
-                        )).toList()),
-          )
+              controller: _controller,
+              children: List<Widget>.generate(
+                _controller.length,
+                (int index) => Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.red),
+                  ),
+                  margin: const EdgeInsets.all(
+                    15,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text('I\'m tab $index'),
+                ),
+              ).toList(),
+            ),
+          ),
         ],
       ),
     );

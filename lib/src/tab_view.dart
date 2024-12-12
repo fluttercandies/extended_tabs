@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: unnecessary_overrides
-
 import 'dart:async';
 
 import 'package:extended_tabs/src/page_view.dart';
@@ -136,9 +134,9 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
   bool get _controllerIsValid => _controller?.animation != null;
 
   void _updateTabController() {
-    final TabController? newController =
-        widget.controller ?? DefaultTabController.of(context);
+    final newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
+      // ignore: unnecessary_null_comparison
       if (newController == null) {
         throw FlutterError('No TabController for ${widget.runtimeType}.\n'
             'When creating a ${widget.runtimeType}, you must either provide an explicit '
@@ -153,18 +151,22 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
       return;
     }
 
-    if (_controllerIsValid)
+    if (_controllerIsValid) {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
+    }
     _controller = newController;
-    if (_controller != null)
+    if (_controller != null) {
       _controller!.animation!.addListener(_handleTabControllerAnimationTick);
+    }
   }
 
   @override
   ScrollPhysics? getScrollPhysics() {
-    return _defaultScrollPhysics.applyTo(widget.physics == null
-        ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
-        : const PageScrollPhysics().applyTo(widget.physics));
+    return _defaultScrollPhysics.applyTo(
+      widget.physics == null
+          ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
+          : const PageScrollPhysics().applyTo(widget.physics),
+    );
   }
 
   @override
@@ -188,6 +190,7 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
   }
 
   @override
+  // ignore: unnecessary_overrides
   void linkParent<S extends StatefulWidget, T extends LinkScrollState<S>>() {
     super.linkParent<ExtendedTabBarView, ExtendedTabBarViewState>();
   }
@@ -211,8 +214,9 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
     if (widget.physics != oldWidget.physics) {
       updatePhysics();
     }
-    if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
+    if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {
       _updateChildren();
+    }
 
     if (oldWidget.scrollDirection != widget.scrollDirection ||
         oldWidget.physics != widget.physics) {
@@ -223,8 +227,9 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
 
   @override
   void dispose() {
-    if (_controllerIsValid)
+    if (_controllerIsValid) {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
+    }
     _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
@@ -236,9 +241,9 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
   }
 
   void _handleTabControllerAnimationTick() {
-    if (_warpUnderwayCount > 0 || !_controller!.indexIsChanging)
+    if (_warpUnderwayCount > 0 || !_controller!.indexIsChanging) {
       return; // This widget is driving the controller's animation.
-
+    }
     if (_controller!.index != _currentIndex) {
       _currentIndex = _controller!.index;
       _warpToCurrentIndex();
@@ -250,20 +255,24 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
       return Future<void>.value();
     }
 
-    if (_pageController.page == _currentIndex!.toDouble())
+    if (_pageController.page == _currentIndex!.toDouble()) {
       return Future<void>.value();
+    }
 
-    final int previousIndex = _controller!.previousIndex;
+    final previousIndex = _controller!.previousIndex;
     if ((_currentIndex! - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex!,
-          duration: kTabScrollDuration, curve: Curves.ease);
+      await _pageController.animateToPage(
+        _currentIndex!,
+        duration: kTabScrollDuration,
+        curve: Curves.ease,
+      );
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
 
     assert((_currentIndex! - previousIndex).abs() > 1);
-    final int initialPage = _currentIndex! > previousIndex
+    final initialPage = _currentIndex! > previousIndex
         ? _currentIndex! - 1
         : _currentIndex! + 1;
     final List<Widget>? originalChildren = _childrenWithKey;
@@ -271,14 +280,17 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
       _warpUnderwayCount += 1;
 
       _childrenWithKey = List<Widget>.from(_childrenWithKey!, growable: false);
-      final Widget temp = _childrenWithKey![initialPage];
+      final temp = _childrenWithKey![initialPage];
       _childrenWithKey![initialPage] = _childrenWithKey![previousIndex];
       _childrenWithKey![previousIndex] = temp;
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex!,
-        duration: kTabScrollDuration, curve: Curves.ease);
+    await _pageController.animateToPage(
+      _currentIndex!,
+      duration: kTabScrollDuration,
+      curve: Curves.ease,
+    );
     if (!mounted) {
       return Future<void>.value();
     }
@@ -355,7 +367,7 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
       return true;
     }());
 
-    final Widget result = NotificationListener<ScrollNotification>(
+    final result = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
@@ -365,9 +377,9 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
           cacheExtent: widget.cacheExtent,
           scrollDirection: widget.scrollDirection,
           physics: usedScrollPhysics,
-          children: _childrenWithKey!,
           shouldIgnorePointerWhenScrolling:
               widget.shouldIgnorePointerWhenScrolling,
+          children: _childrenWithKey!,
         ),
       ),
     );

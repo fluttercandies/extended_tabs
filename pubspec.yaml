@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   sync_scroll_library: ^1.1.0
 
 dev_dependencies:

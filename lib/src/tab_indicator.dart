@@ -7,7 +7,7 @@ class ColorTabIndicator extends Decoration {
   final Color color;
 
   @override
-  _ColorPainter createBoxPainter([VoidCallback? onChanged]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     return _ColorPainter(this, onChanged);
   }
 }
@@ -20,8 +20,8 @@ class _ColorPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    final Rect rect = offset & configuration.size!;
-    final Paint paint = Paint();
+    final rect = offset & configuration.size!;
+    final paint = Paint();
     paint.color = decoration.color;
     canvas.drawRect(rect, paint);
   }
@@ -99,13 +99,16 @@ class ExtendedUnderlineTabIndicator extends Decoration {
   }
 
   @override
-  _UnderlinePainter createBoxPainter([VoidCallback? onChanged]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     return _UnderlinePainter(this, onChanged);
   }
 
   Rect _indicatorRectFor(
-      Rect rect, TextDirection textDirection, Axis scrollDirection) {
-    final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
+    Rect rect,
+    TextDirection textDirection,
+    Axis scrollDirection,
+  ) {
+    final indicator = insets.resolve(textDirection).deflateRect(rect);
     return scrollDirection == Axis.horizontal
         ? Rect.fromLTWH(
             indicator.left + (size != null ? (indicator.width - size!) / 2 : 0),
@@ -139,12 +142,12 @@ class _UnderlinePainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    final Rect rect = offset & configuration.size!;
-    final TextDirection textDirection = configuration.textDirection!;
-    final Rect indicator = decoration
+    final rect = offset & configuration.size!;
+    final textDirection = configuration.textDirection!;
+    final indicator = decoration
         ._indicatorRectFor(rect, textDirection, decoration.scrollDirection)
         .deflate(decoration.borderSide.width / 2.0);
-    final Paint paint = decoration.borderSide.toPaint()
+    final paint = decoration.borderSide.toPaint()
       ..strokeCap = decoration.strokeCap;
     switch (decoration.scrollDirection) {
       case Axis.horizontal:

@@ -1,3 +1,7 @@
+## 4.2.0
+
+* Migrate to Flutter 3.27
+
 ## 4.1.0
 
 * Migrate to Flutter 3.10.0

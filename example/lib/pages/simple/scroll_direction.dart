@@ -1,7 +1,8 @@
-import 'package:example/widget/list.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
+
+import '../../widget/list.dart';
 
 @FFRoute(
   name: 'fluttercandies://scroll_direction',
@@ -12,12 +13,14 @@ import 'package:flutter/material.dart';
     'order': 1,
   },
 )
-class SrollDirectionDemo extends StatefulWidget {
+class ScrollDirectionDemo extends StatefulWidget {
+  const ScrollDirectionDemo({Key? key}) : super(key: key);
+
   @override
-  _SrollDirectionDemoState createState() => _SrollDirectionDemoState();
+  State<ScrollDirectionDemo> createState() => _ScrollDirectionDemoState();
 }
 
-class _SrollDirectionDemoState extends State<SrollDirectionDemo>
+class _ScrollDirectionDemoState extends State<ScrollDirectionDemo>
     with TickerProviderStateMixin {
   late TabController tabController;
   late TabController tabController1;
@@ -63,6 +66,8 @@ class _SrollDirectionDemoState extends State<SrollDirectionDemo>
           ),
           Expanded(
             child: ExtendedTabBarView(
+              controller: tabController,
+              scrollDirection: Axis.vertical,
               children: <Widget>[
                 Row(
                   children: <Widget>[
@@ -88,6 +93,8 @@ class _SrollDirectionDemoState extends State<SrollDirectionDemo>
                     ),
                     Expanded(
                       child: ExtendedTabBarView(
+                        controller: tabController1,
+                        scrollDirection: Axis.vertical,
                         children: <Widget>[
                           Row(
                             children: <Widget>[
@@ -120,6 +127,18 @@ class _SrollDirectionDemoState extends State<SrollDirectionDemo>
                               ),
                               Expanded(
                                 child: ExtendedTabBarView(
+                                  controller: tabController2,
+
+                                  /// if link is true and current tabbarview over scroll,
+                                  /// it will check and scroll ancestor or child tabbarView.
+                                  link: true,
+
+                                  /// cache page count
+                                  /// default is 0.
+                                  /// if cacheExtent is 1, it has two pages in cache
+                                  /// null is infinity, it will cache all pages
+                                  cacheExtent: 1,
+                                  scrollDirection: Axis.vertical,
                                   children: const <Widget>[
                                     ListWidget(
                                       'Tab000',
@@ -138,20 +157,8 @@ class _SrollDirectionDemoState extends State<SrollDirectionDemo>
                                       scrollDirection: Axis.horizontal,
                                     ),
                                   ],
-                                  controller: tabController2,
-
-                                  /// if link is true and current tabbarview over scroll,
-                                  /// it will check and scroll ancestor or child tabbarView.
-                                  link: true,
-
-                                  /// cache page count
-                                  /// default is 0.
-                                  /// if cacheExtent is 1, it has two pages in cache
-                                  /// null is infinity, it will cache all pages
-                                  cacheExtent: 1,
-                                  scrollDirection: Axis.vertical,
                                 ),
-                              )
+                              ),
                             ],
                           ),
                           const ListWidget(
@@ -163,10 +170,8 @@ class _SrollDirectionDemoState extends State<SrollDirectionDemo>
                             scrollDirection: Axis.horizontal,
                           ),
                         ],
-                        controller: tabController1,
-                        scrollDirection: Axis.vertical,
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const ListWidget(
@@ -174,10 +179,8 @@ class _SrollDirectionDemoState extends State<SrollDirectionDemo>
                   scrollDirection: Axis.horizontal,
                 ),
               ],
-              controller: tabController,
-              scrollDirection: Axis.vertical,
             ),
-          )
+          ),
         ],
       ),
     );

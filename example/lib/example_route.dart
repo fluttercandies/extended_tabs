@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'pages/main_page.dart';
 import 'pages/simple/carousel_indicator.dart';
 import 'pages/simple/link.dart';
-import 'pages/simple/mainAxisAlignment.dart';
+import 'pages/simple/main_axis_alignment.dart';
 import 'pages/simple/scroll_direction.dart';
 
 FFRouteSettings getRouteSettings({
@@ -70,7 +70,7 @@ FFRouteSettings getRouteSettings({
       return FFRouteSettings(
         name: name,
         arguments: arguments,
-        builder: () => SrollDirectionDemo(),
+        builder: () => ScrollDirectionDemo(),
         routeName: 'ScrollDirection',
         description: 'set scroll direction of tabbar and tabView',
         exts: <String, dynamic>{'group': 'Simple', 'order': 1},

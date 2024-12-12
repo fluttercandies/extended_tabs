@@ -1,0 +1,54 @@
+name: Runnable (stable)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - "**.md"
+
+jobs:
+  analyze:
+    name: Analyze on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Log Dart/Flutter versions
+        run: |
+          dart --version
+          flutter --version
+      - name: Prepare dependencies
+        run: flutter pub get
+      - name: Analyse the repo
+        run: flutter analyze lib example/lib
+      - name: Run tests
+        run: flutter test
+      - name: Generate docs
+        run: |
+          dart pub global activate dartdoc
+          dart pub global run dartdoc .
+
+  test_web_build:
+    needs: analyze
+    name: Test build on Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.8.0
+        with:
+          channel: stable
+      - run: dart --version
+      - run: flutter --version
+      - run: flutter pub get
+      - run: cd example; flutter build web

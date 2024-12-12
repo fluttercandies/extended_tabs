@@ -1,7 +1,8 @@
-import 'package:example/widget/list.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
+
+import '../../widget/list.dart';
 
 @FFRoute(
   name: 'fluttercandies://link',
@@ -14,8 +15,10 @@ import 'package:flutter/material.dart';
   },
 )
 class LinkDemo extends StatefulWidget {
+  const LinkDemo({Key? key}) : super(key: key);
+
   @override
-  _LinkDemoState createState() => _LinkDemoState();
+  State<LinkDemo> createState() => _LinkDemoState();
 }
 
 class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
@@ -57,6 +60,7 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
           Expanded(
             child: ExtendedTabBarView(
               shouldIgnorePointerWhenScrolling: false,
+              controller: tabController,
               children: <Widget>[
                 Column(
                   children: <Widget>[
@@ -73,6 +77,7 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
                     Expanded(
                       child: ExtendedTabBarView(
                         shouldIgnorePointerWhenScrolling: false,
+                        controller: tabController1,
                         children: <Widget>[
                           Column(
                             children: <Widget>[
@@ -92,39 +97,35 @@ class _LinkDemoState extends State<LinkDemo> with TickerProviderStateMixin {
                               Expanded(
                                 child: ExtendedTabBarView(
                                   shouldIgnorePointerWhenScrolling: false,
+                                  controller: tabController2,
+                                  // if link is true and current TabBarView over scroll,
+                                  // it will check and scroll ancestor or child TabBarView.
+                                  link: true,
+                                  // cache page count
+                                  // default is 0.
+                                  // if cacheExtent is 1, it has two pages in cache
+                                  cacheExtent: 1,
                                   children: const <Widget>[
                                     ListWidget('Tab000'),
                                     ListWidget('Tab001'),
                                     ListWidget('Tab002'),
                                     ListWidget('Tab003'),
                                   ],
-                                  controller: tabController2,
-
-                                  /// if link is true and current tabbarview over scroll,
-                                  /// it will check and scroll ancestor or child tabbarView.
-                                  link: true,
-
-                                  /// cache page count
-                                  /// default is 0.
-                                  /// if cacheExtent is 1, it has two pages in cache
-                                  cacheExtent: 1,
                                 ),
-                              )
+                              ),
                             ],
                           ),
                           const ListWidget('Tab01'),
                           const ListWidget('Tab02'),
                         ],
-                        controller: tabController1,
                       ),
-                    )
+                    ),
                   ],
                 ),
-                const ListWidget('Tab1')
+                const ListWidget('Tab1'),
               ],
-              controller: tabController,
             ),
-          )
+          ),
         ],
       ),
     );

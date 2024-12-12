@@ -1,35 +1,46 @@
 import 'package:collection/collection.dart';
-import 'package:example/example_routes.dart';
 import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
 import '../example_route.dart';
-import '../example_routes.dart' as example_routes;
+import '../example_routes.dart' as routes;
 
 @FFRoute(
   name: 'fluttercandies://mainpage',
   routeName: 'MainPage',
 )
-class MainPage extends StatelessWidget {
-  MainPage() {
-    final List<String> routeNames = <String>[];
-    routeNames.addAll(example_routes.routeNames);
-    routeNames.remove(Routes.fluttercandiesMainpage);
-    routeNames.remove(Routes.fluttercandiesDemogrouppage);
-    routesGroup.addAll(groupBy<DemoRouteResult, String>(
-        routeNames
-            .map<FFRouteSettings>((String name) => getRouteSettings(name: name))
-            .where((FFRouteSettings element) => element.exts != null)
-            .map<DemoRouteResult>((FFRouteSettings e) => DemoRouteResult(e))
-            .toList()
-          ..sort((DemoRouteResult a, DemoRouteResult b) =>
-              b.group.compareTo(a.group)),
-        (DemoRouteResult x) => x.group));
-  }
+class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
   final Map<String, List<DemoRouteResult>> routesGroup =
       <String, List<DemoRouteResult>>{};
+
+  @override
+  void initState() {
+    super.initState();
+    final List<String> routeNames = <String>[];
+    routeNames.addAll(routes.routeNames);
+    routeNames.remove(routes.Routes.fluttercandiesMainpage);
+    routeNames.remove(routes.Routes.fluttercandiesDemogrouppage);
+    routesGroup.addAll(
+      groupBy<DemoRouteResult, String>(
+        routeNames
+            .map<FFRouteSettings>((name) => getRouteSettings(name: name))
+            .where((element) => element.exts != null)
+            .map<DemoRouteResult>((e) => DemoRouteResult(e))
+            .toList()
+          ..sort((a, b) => b.group.compareTo(a.group)),
+        (DemoRouteResult x) => x.group,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +63,11 @@ class MainPage extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                launchUrl(Uri.parse(
-                    'https://github.com/fluttercandies/extended_tabs'));
+                launchUrl(
+                  Uri.parse(
+                    'https://github.com/fluttercandies/extended_tabs',
+                  ),
+                );
               },
             ),
           ),
@@ -67,39 +81,42 @@ class MainPage extends StatelessWidget {
                 launchUrl(Uri.parse('https://jq.qq.com/?_wv=1027&k=5bcc0gy'));
               },
             ),
-          )
+          ),
         ],
       ),
       body: ListView.builder(
         itemBuilder: (BuildContext c, int index) {
-          // final RouteResult page = routes[index];
-          final String type = routesGroup.keys.toList()[index];
+          // final page = routes[index];
+          final type = routesGroup.keys.toList()[index];
           return Container(
-              margin: const EdgeInsets.all(20.0),
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      (index + 1).toString() + '.' + type,
-                      //style: TextStyle(inherit: false),
-                    ),
-                    Text(
-                      '$type demos of extended_tabs',
-                      //page.description,
-                      style: const TextStyle(color: Colors.grey),
-                    )
-                  ],
-                ),
-                onTap: () {
-                  Navigator.pushNamed(
-                      context, Routes.fluttercandiesDemogrouppage,
-                      arguments: <String, dynamic>{
-                        'keyValue': routesGroup.entries.toList()[index],
-                      });
-                },
-              ));
+            margin: const EdgeInsets.all(20.0),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    '${index + 1}.$type',
+                    //style: TextStyle(inherit: false),
+                  ),
+                  Text(
+                    '$type demos of extended_tabs',
+                    //page.description,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  routes.Routes.fluttercandiesDemogrouppage,
+                  arguments: <String, dynamic>{
+                    'keyValue': routesGroup.entries.toList()[index],
+                  },
+                );
+              },
+            ),
+          );
         },
         itemCount: routesGroup.length,
       ),
@@ -112,13 +129,16 @@ class MainPage extends StatelessWidget {
   routeName: 'DemoGroupPage',
 )
 class DemoGroupPage extends StatelessWidget {
-  DemoGroupPage({required MapEntry<String, List<DemoRouteResult>> keyValue})
-      : routes = keyValue.value
-          ..sort((DemoRouteResult a, DemoRouteResult b) =>
-              a.order.compareTo(b.order)),
-        group = keyValue.key;
+  DemoGroupPage({
+    required MapEntry<String, List<DemoRouteResult>> keyValue,
+    Key? key,
+  })  : routes = keyValue.value.sorted((a, b) => a.order.compareTo(b.order)),
+        group = keyValue.key,
+        super(key: key);
+
   final List<DemoRouteResult> routes;
   final String group;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +147,7 @@ class DemoGroupPage extends StatelessWidget {
       ),
       body: ListView.builder(
         itemBuilder: (BuildContext context, int index) {
-          final DemoRouteResult page = routes[index];
+          final page = routes[index];
           return Container(
             margin: const EdgeInsets.all(20.0),
             child: GestureDetector(
@@ -136,13 +156,13 @@ class DemoGroupPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (index + 1).toString() + '.' + page.routeResult.routeName!,
+                    '${index + 1}.${page.routeResult.routeName!}',
                     //style: TextStyle(inherit: false),
                   ),
                   Text(
                     page.routeResult.description!,
                     style: const TextStyle(color: Colors.grey),
-                  )
+                  ),
                 ],
               ),
               onTap: () {

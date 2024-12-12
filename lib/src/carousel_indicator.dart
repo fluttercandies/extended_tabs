@@ -1,9 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
 import 'tab_bar.dart';
 
 class CarouselIndicator extends StatelessWidget {
   const CarouselIndicator({
+    Key? key,
     this.controller,
     this.size = const Size(20, 5),
     this.unselectedColor,
@@ -11,7 +13,7 @@ class CarouselIndicator extends StatelessWidget {
     this.strokeCap = StrokeCap.square,
     this.indicatorPadding = const EdgeInsets.symmetric(horizontal: 5),
     this.tapEnable = false,
-  });
+  }) : super(key: key);
 
   /// Coordinates tab selection between a [CarouselIndicator] and a [TabBarView].
   final TabController? controller;
@@ -32,11 +34,12 @@ class CarouselIndicator extends StatelessWidget {
   final EdgeInsets indicatorPadding;
 
   final bool tapEnable;
+
   @override
   Widget build(BuildContext context) {
-    final TabController? controller =
-        this.controller ?? DefaultTabController.of(context);
+    final controller = this.controller ?? DefaultTabController.of(context);
     assert(() {
+      // ignore: unnecessary_null_comparison
       if (controller == null) {
         throw FlutterError('No TabController for $runtimeType.\n'
             'When creating a $runtimeType, you must either provide an explicit '
@@ -46,10 +49,10 @@ class CarouselIndicator extends StatelessWidget {
       }
       return true;
     }());
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final Color selectedColor =
+    final tabBarTheme = TabBarTheme.of(context);
+    final selectedColor =
         this.selectedColor ?? Theme.of(context).indicatorColor;
-    final Color unselectedColor = this.unselectedColor ??
+    final unselectedColor = this.unselectedColor ??
         tabBarTheme.unselectedLabelColor ??
         selectedColor.withOpacity(0.3);
     return IntrinsicWidth(
@@ -64,6 +67,7 @@ class CarouselIndicator extends StatelessWidget {
             strokeCap: strokeCap,
             insets: indicatorPadding.copyWith(left: 0, right: 0),
           ),
+          // ignore: unnecessary_non_null_assertion
           controller: controller!,
           tabs: List<Widget>.filled(
             controller.length,
@@ -119,11 +123,13 @@ class _UnSelectedIndicatorPainter extends CustomPainter {
     this.color,
     this.strokeCap,
   );
+
   final Color color;
   final StrokeCap strokeCap;
+
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
+    final rect = Offset.zero & size;
     canvas.drawLine(
       rect.bottomLeft,
       rect.bottomRight,
@@ -202,7 +208,7 @@ class _UnderlineTabIndicator extends Decoration {
   }
 
   Rect _indicatorRectFor(Rect rect, TextDirection textDirection) {
-    final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
+    final indicator = insets.resolve(textDirection).deflateRect(rect);
     return Rect.fromLTWH(
       indicator.left,
       indicator.top,
@@ -226,10 +232,10 @@ class _UnderlinePainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    final Rect rect = offset & configuration.size!;
-    final TextDirection textDirection = configuration.textDirection!;
-    final Rect indicator = decoration._indicatorRectFor(rect, textDirection);
-    final Paint paint = decoration.borderSide.toPaint()
+    final rect = offset & configuration.size!;
+    final textDirection = configuration.textDirection!;
+    final indicator = decoration._indicatorRectFor(rect, textDirection);
+    final paint = decoration.borderSide.toPaint()
       ..strokeCap = decoration.strokeCap;
     canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
   }

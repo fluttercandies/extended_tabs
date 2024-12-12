@@ -1,9 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-/// Provide a way for contents get hittest when it's scrolling
-///
-///
+/// Provide a way for contents get hit test when it's scrolling
 class ExtendedScrollable extends Scrollable {
   const ExtendedScrollable({
     Key? key,
@@ -32,14 +30,15 @@ class ExtendedScrollable extends Scrollable {
           scrollBehavior: scrollBehavior,
         );
   final bool shouldIgnorePointerWhenScrolling;
+
   @override
-  _ExtendedScrollableState createState() => _ExtendedScrollableState();
+  ExtendedScrollableState createState() => ExtendedScrollableState();
 }
 
-class _ExtendedScrollableState extends ScrollableState {
+class ExtendedScrollableState extends ScrollableState {
   @override
   void setIgnorePointer(bool value) {
-    final ExtendedScrollable scrollable = widget as ExtendedScrollable;
+    final scrollable = widget as ExtendedScrollable;
     if (scrollable.shouldIgnorePointerWhenScrolling) {
       super.setIgnorePointer(value);
     }

@@ -200,6 +200,15 @@ class ExtendedTabBarViewState extends LinkScrollState<ExtendedTabBarView> {
     if (widget.controller != oldWidget.controller) {
       _updateTabController();
       _currentIndex = _controller?.index;
+
+      if (_currentIndex != null) {
+        _pageController.jumpToPage(_currentIndex!);
+        _pageController.animateToPage(
+          _currentIndex!,
+          duration: kTabScrollDuration,
+          curve: Curves.ease,
+        );
+      }
     }
     if ((widget.pageController != null &&
             widget.pageController != oldWidget.pageController) ||

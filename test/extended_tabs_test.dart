@@ -4,6 +4,6 @@ import 'package:extended_tabs/extended_tabs.dart';
 
 void main() {
   test('fake test', () {
-    expect(ExtendedTab(text: 'FlutterCandies'), isA<ExtendedTab>());
+    expect(const ExtendedTab(text: 'FlutterCandies'), isA<ExtendedTab>());
   });
 }

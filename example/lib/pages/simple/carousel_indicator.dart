@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
   },
 )
 class CarouselIndicatorDemo extends StatefulWidget {
-  const CarouselIndicatorDemo({Key? key}) : super(key: key);
+  const CarouselIndicatorDemo({super.key});
 
   @override
   State<CarouselIndicatorDemo> createState() => _CarouselIndicatorDemoState();

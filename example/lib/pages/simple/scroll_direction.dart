@@ -14,7 +14,7 @@ import '../../widget/list.dart';
   },
 )
 class ScrollDirectionDemo extends StatefulWidget {
-  const ScrollDirectionDemo({Key? key}) : super(key: key);
+  const ScrollDirectionDemo({super.key});
 
   @override
   State<ScrollDirectionDemo> createState() => _ScrollDirectionDemoState();

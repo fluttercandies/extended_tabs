@@ -1,3 +1,7 @@
+## 5.0.0
+
+* refactor code structure
+
 ## 4.2.0
 
 * Migrate to Flutter 3.27

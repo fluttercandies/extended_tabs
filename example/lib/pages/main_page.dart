@@ -1,18 +1,17 @@
 import 'package:collection/collection.dart';
+import 'package:extended_tabs_example/extended_tabs_example_route.dart';
 import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
 
-import 'package:url_launcher/url_launcher.dart';
-
-import '../example_route.dart';
-import '../example_routes.dart' as routes;
+import 'package:extended_tabs_example/extended_tabs_example_routes.dart'
+    as routes;
 
 @FFRoute(
   name: 'fluttercandies://mainpage',
   routeName: 'MainPage',
 )
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -49,40 +48,6 @@ class _MainPageState extends State<MainPage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: const Text('extended_tabs'),
-        actions: <Widget>[
-          ButtonTheme(
-            minWidth: 0.0,
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: TextButton(
-              child: const Text(
-                'Github',
-                style: TextStyle(
-                  decorationStyle: TextDecorationStyle.solid,
-                  decoration: TextDecoration.underline,
-                  color: Colors.white,
-                ),
-              ),
-              onPressed: () {
-                launchUrl(
-                  Uri.parse(
-                    'https://github.com/fluttercandies/extended_tabs',
-                  ),
-                );
-              },
-            ),
-          ),
-          ButtonTheme(
-            padding: const EdgeInsets.only(right: 10.0),
-            minWidth: 0.0,
-            child: TextButton(
-              child:
-                  Image.network('https://pub.idqqimg.com/wpa/images/group.png'),
-              onPressed: () {
-                launchUrl(Uri.parse('https://jq.qq.com/?_wv=1027&k=5bcc0gy'));
-              },
-            ),
-          ),
-        ],
       ),
       body: ListView.builder(
         itemBuilder: (BuildContext c, int index) {
@@ -131,10 +96,9 @@ class _MainPageState extends State<MainPage> {
 class DemoGroupPage extends StatelessWidget {
   DemoGroupPage({
     required MapEntry<String, List<DemoRouteResult>> keyValue,
-    Key? key,
+    super.key,
   })  : routes = keyValue.value.sorted((a, b) => a.order.compareTo(b.order)),
-        group = keyValue.key,
-        super(key: key);
+        group = keyValue.key;
 
   final List<DemoRouteResult> routes;
   final String group;

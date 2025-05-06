@@ -1,18 +1,14 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// ignore_for_file: require_trailing_commas
 
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+part of 'package:extended_tabs/src/extended/page_view.dart';
 
-import 'scrollable.dart';
+// [PageView]
 
 // Having this global (mutable) page controller is a bit of a hack. We need it
 // to plumb in the factory for _PagePosition, but it will end up accumulating
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
-final _defaultPageController = PageController();
+final PageController _defaultPageController = PageController();
 const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
@@ -21,15 +17,22 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// You can use a [PageController] to control which page is visible in the view.
 /// In addition to being able to control the pixel offset of the content inside
-/// the [ExtendedPageView], a [PageController] also lets you control the offset in terms
+/// the [PageView], a [PageController] also lets you control the offset in terms
 /// of pages, which are increments of the viewport size.
 ///
 /// The [PageController] can also be used to control the
 /// [PageController.initialPage], which determines which page is shown when the
-/// [ExtendedPageView] is first constructed, and the [PageController.viewportFraction],
+/// [PageView] is first constructed, and the [PageController.viewportFraction],
 /// which determines the size of the pages as a fraction of the viewport size.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
+///
+/// {@tool dartpad}
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
+///
+/// ** See code in examples/api/lib/widgets/page_view/page_view.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -39,7 +42,7 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///  * [GridView], for a scrollable grid of boxes.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
-class ExtendedPageView extends StatefulWidget {
+class _PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page from an explicit [List]
   /// of widgets.
   ///
@@ -47,8 +50,19 @@ class ExtendedPageView extends StatefulWidget {
   /// children because constructing the [List] requires doing work for every
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
-  ExtendedPageView({
-    Key? key,
+  ///
+  /// Like other widgets in the framework, this widget expects that
+  /// the [children] list will not be mutated after it has been passed in here.
+  /// See the documentation at [SliverChildListDelegate.children] for more details.
+  ///
+  /// {@template flutter.widgets.PageView.allowImplicitScrolling}
+  /// The [allowImplicitScrolling] parameter must not be null. If true, the
+  /// [PageView] will participate in accessibility scrolling more like a
+  /// [ListView], where implicit scroll actions will move to the next page
+  /// rather than into the contents of the [PageView].
+  /// {@endtemplate}
+  _PageView({
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     PageController? controller,
@@ -60,11 +74,10 @@ class ExtendedPageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.cacheExtent = 0,
-    this.shouldIgnorePointerWhenScrolling = true,
+    this.scrollBehavior,
+    this.padEnds = true,
   })  : controller = controller ?? _defaultPageController,
-        childrenDelegate = SliverChildListDelegate(children),
-        super(key: key);
+        childrenDelegate = SliverChildListDelegate(children);
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -73,36 +86,134 @@ class ExtendedPageView extends StatefulWidget {
   /// number of children because the builder is called only for those children
   /// that are actually visible.
   ///
-  /// Providing a non-null [itemCount] lets the [ExtendedPageView] compute the maximum
+  /// Providing a non-null [itemCount] lets the [PageView] compute the maximum
   /// scroll extent.
   ///
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
-  ExtendedPageView.builder({
-    Key? key,
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// {@template flutter.widgets.PageView.findChildIndexCallback}
+  /// The [findChildIndexCallback] corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property. If null,
+  /// a child widget may not map to its existing [RenderObject] when the order
+  /// of children returned from the children builder changes.
+  /// This may result in state-loss. This callback needs to be implemented if
+  /// the order of the children may change at a later time.
+  /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
+  _PageView.builder({
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     PageController? controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.cacheExtent = 0,
-    this.shouldIgnorePointerWhenScrolling = true,
+    this.scrollBehavior,
+    this.padEnds = true,
   })  : controller = controller ?? _defaultPageController,
-        childrenDelegate =
-            SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
-        super(key: key);
+        childrenDelegate = SliverChildBuilderDelegate(
+          itemBuilder,
+          findChildIndexCallback: findChildIndexCallback,
+          childCount: itemCount,
+        );
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
-  ExtendedPageView.custom({
-    Key? key,
+  ///
+  /// {@tool snippet}
+  ///
+  /// This [PageView] uses a custom [SliverChildBuilderDelegate] to support child
+  /// reordering.
+  ///
+  /// ```dart
+  /// class MyPageView extends StatefulWidget {
+  ///   const MyPageView({super.key});
+  ///
+  ///   @override
+  ///   State<MyPageView> createState() => _MyPageViewState();
+  /// }
+  ///
+  /// class _MyPageViewState extends State<MyPageView> {
+  ///   List<String> items = <String>['1', '2', '3', '4', '5'];
+  ///
+  ///   void _reverse() {
+  ///     setState(() {
+  ///       items = items.reversed.toList();
+  ///     });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       body: SafeArea(
+  ///         child: PageView.custom(
+  ///           childrenDelegate: SliverChildBuilderDelegate(
+  ///             (BuildContext context, int index) {
+  ///               return KeepAlive(
+  ///                 data: items[index],
+  ///                 key: ValueKey<String>(items[index]),
+  ///               );
+  ///             },
+  ///             childCount: items.length,
+  ///             findChildIndexCallback: (Key key) {
+  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
+  ///               final String data = valueKey.value;
+  ///               return items.indexOf(data);
+  ///             }
+  ///           ),
+  ///         ),
+  ///       ),
+  ///       bottomNavigationBar: BottomAppBar(
+  ///         child: Row(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             TextButton(
+  ///               onPressed: () => _reverse(),
+  ///               child: const Text('Reverse items'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class KeepAlive extends StatefulWidget {
+  ///   const KeepAlive({super.key, required this.data});
+  ///
+  ///   final String data;
+  ///
+  ///   @override
+  ///   State<KeepAlive> createState() => _KeepAliveState();
+  /// }
+  ///
+  /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
+  ///   @override
+  ///   bool get wantKeepAlive => true;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     super.build(context);
+  ///     return Text(widget.data);
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
+  _PageView.custom({
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     PageController? controller,
@@ -114,10 +225,9 @@ class ExtendedPageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.cacheExtent = 0,
-    this.shouldIgnorePointerWhenScrolling = true,
-  })  : controller = controller ?? _defaultPageController,
-        super(key: key);
+    this.scrollBehavior,
+    this.padEnds = true,
+  }) : controller = controller ?? _defaultPageController;
 
   /// Controls whether the widget's pages will respond to
   /// [RenderObject.showOnScreen], which will allow for implicit accessibility
@@ -135,7 +245,10 @@ class ExtendedPageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  /// The axis along which the page view scrolls.
+  /// The [Axis] along which the scroll view's offset increases with each page.
+  ///
+  /// For the direction in which active scrolling may be occurring, see
+  /// [ScrollDirection].
   ///
   /// Defaults to [Axis.horizontal].
   final Axis scrollDirection;
@@ -166,19 +279,27 @@ class ExtendedPageView extends StatefulWidget {
   /// The physics are modified to snap to page boundaries using
   /// [PageScrollPhysics] prior to being used.
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
+  ///
+  /// If the [padEnds] is false and [PageController.viewportFraction] < 1.0,
+  /// the page will snap to the beginning of the viewport; otherwise, the page
+  /// will snap to the center of the viewport.
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int>? onPageChanged;
 
-  /// A delegate that provides the children for the [ExtendedPageView].
+  /// A delegate that provides the children for the [_PageView].
   ///
-  /// The [ExtendedPageView.custom] constructor lets you specify this delegate
-  /// explicitly. The [ExtendedPageView] and [ExtendedPageView.builder] constructors create a
+  /// The [PageView.custom] constructor lets you specify this delegate
+  /// explicitly. The [_PageView] and [PageView.builder] constructors create a
   /// [childrenDelegate] that wraps the given [List] and [IndexedWidgetBuilder],
   /// respectively.
   final SliverChildDelegate childrenDelegate;
@@ -186,24 +307,39 @@ class ExtendedPageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// cache page count
-  /// default is 0.
-  /// if cacheExtent is 1, it has two pages in cache
-  /// null is infinity, it will cache all pages
-  final int cacheExtent;
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to not apply a [Scrollbar].
+  final ScrollBehavior? scrollBehavior;
 
-  final bool shouldIgnorePointerWhenScrolling;
+  /// Whether to add padding to both ends of the list.
+  ///
+  /// If this is set to true and [PageController.viewportFraction] < 1.0, padding will be added
+  /// such that the first and last child slivers will be in the center of
+  /// the viewport when scrolled all the way to the start or end, respectively.
+  ///
+  /// If [PageController.viewportFraction] >= 1.0, this property has no effect.
+  ///
+  /// This property defaults to true and must not be null.
+  final bool padEnds;
 
   @override
-  State<ExtendedPageView> createState() => _ExtendedPageViewState();
+  State<_PageView> createState() => _PageViewState();
 }
 
-class _ExtendedPageViewState extends State<ExtendedPageView> {
+/// zmtzawqlp
+class _PageViewState<T extends _PageView> extends State<T> {
   int _lastReportedPage = 0;
 
   @override
@@ -216,8 +352,9 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         assert(debugCheckHasDirectionality(context));
-        final textDirection = Directionality.of(context);
-        final axisDirection = textDirectionToAxisDirection(textDirection);
+        final TextDirection textDirection = Directionality.of(context);
+        final AxisDirection axisDirection =
+            textDirectionToAxisDirection(textDirection);
         return widget.reverse
             ? flipAxisDirection(axisDirection)
             : axisDirection;
@@ -228,13 +365,14 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final axisDirection = _getDirection(context);
-    final physics = _ForceImplicitScrollPhysics(
+    final AxisDirection axisDirection = _getDirection(context);
+    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,
     ).applyTo(
       widget.pageSnapping
-          ? _kPagePhysics.applyTo(widget.physics)
-          : widget.physics,
+          ? _kPagePhysics.applyTo(widget.physics ??
+              widget.scrollBehavior?.getScrollPhysics(context))
+          : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
     );
 
     return NotificationListener<ScrollNotification>(
@@ -242,8 +380,8 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         if (notification.depth == 0 &&
             widget.onPageChanged != null &&
             notification is ScrollUpdateNotification) {
-          final metrics = notification.metrics as PageMetrics;
-          final currentPage = metrics.page!.round();
+          final PageMetrics metrics = notification.metrics as PageMetrics;
+          final int currentPage = metrics.page!.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;
             widget.onPageChanged!(currentPage);
@@ -251,22 +389,20 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
         }
         return false;
       },
-      child: ExtendedScrollable(
+      child: Scrollable(
         dragStartBehavior: widget.dragStartBehavior,
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
-        shouldIgnorePointerWhenScrolling:
-            widget.shouldIgnorePointerWhenScrolling,
+        scrollBehavior: widget.scrollBehavior ??
+            ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent
             // independent of implicit scrolling:
             // https://github.com/flutter/flutter/issues/45632
-            cacheExtent: widget.cacheExtent > 0
-                ? widget.cacheExtent.toDouble()
-                : (widget.allowImplicitScrolling ? 1.0 : 0.0),
+            cacheExtent: widget.allowImplicitScrolling ? 1.0 : 0.0,
             cacheExtentStyle: CacheExtentStyle.viewport,
             axisDirection: axisDirection,
             offset: position,
@@ -275,6 +411,7 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,
                 delegate: widget.childrenDelegate,
+                padEnds: widget.padEnds,
               ),
             ],
           );
@@ -289,44 +426,26 @@ class _ExtendedPageViewState extends State<ExtendedPageView> {
     description
         .add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
     description.add(
-      FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'),
-    );
-    description.add(
-      DiagnosticsProperty<PageController>(
-        'controller',
-        widget.controller,
-        showName: false,
-      ),
-    );
-    description.add(
-      DiagnosticsProperty<ScrollPhysics>(
-        'physics',
-        widget.physics,
-        showName: false,
-      ),
-    );
-    description.add(
-      FlagProperty(
-        'pageSnapping',
-        value: widget.pageSnapping,
-        ifFalse: 'snapping disabled',
-      ),
-    );
-    description.add(
-      FlagProperty(
-        'allowImplicitScrolling',
+        FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
+    description.add(DiagnosticsProperty<PageController>(
+        'controller', widget.controller,
+        showName: false));
+    description.add(DiagnosticsProperty<ScrollPhysics>(
+        'physics', widget.physics,
+        showName: false));
+    description.add(FlagProperty('pageSnapping',
+        value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+    description.add(FlagProperty('allowImplicitScrolling',
         value: widget.allowImplicitScrolling,
-        ifTrue: 'allow implicit scrolling',
-      ),
-    );
+        ifTrue: 'allow implicit scrolling'));
   }
 }
 
 class _ForceImplicitScrollPhysics extends ScrollPhysics {
   const _ForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
-    ScrollPhysics? parent,
-  }) : super(parent: parent);
+    super.parent,
+  });
 
   @override
   _ForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {

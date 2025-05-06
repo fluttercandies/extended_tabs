@@ -1,11 +1,11 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+// ignore_for_file: unused_element
 
-import 'tab_bar.dart';
+import 'package:extended_tabs/src/extended/tab_bar.dart';
+import 'package:flutter/material.dart';
 
 class CarouselIndicator extends StatelessWidget {
   const CarouselIndicator({
-    Key? key,
+    super.key,
     this.controller,
     this.size = const Size(20, 5),
     this.unselectedColor,
@@ -13,7 +13,7 @@ class CarouselIndicator extends StatelessWidget {
     this.strokeCap = StrokeCap.square,
     this.indicatorPadding = const EdgeInsets.symmetric(horizontal: 5),
     this.tapEnable = false,
-  }) : super(key: key);
+  });
 
   /// Coordinates tab selection between a [CarouselIndicator] and a [TabBarView].
   final TabController? controller;
@@ -89,27 +89,19 @@ class CarouselIndicator extends StatelessWidget {
 
 class _TabBar extends ExtendedTabBar {
   const _TabBar({
-    Key? key,
-    required List<Widget> tabs,
-    required TabController controller,
+    super.key,
+    required super.tabs,
+    required TabController super.controller,
     EdgeInsetsGeometry indicatorPadding = EdgeInsets.zero,
-    Decoration? indicator,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    MouseCursor? mouseCursor,
-    ScrollPhysics? physics,
+    super.indicator,
+    super.dragStartBehavior,
+    super.mouseCursor,
+    super.physics,
     this.size,
   }) : super(
-          key: key,
-          tabs: tabs,
-          controller: controller,
           isScrollable: false,
-          //indicatorPadding: indicatorPadding,
-          indicator: indicator,
           labelPadding: indicatorPadding,
           indicatorSize: TabBarIndicatorSize.label,
-          dragStartBehavior: dragStartBehavior,
-          mouseCursor: mouseCursor,
-          physics: physics,
           foregroundIndicator: true,
         );
   final Size? size;

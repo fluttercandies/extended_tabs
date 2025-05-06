@@ -1,12 +1,12 @@
 import 'package:ff_annotation_route_library/ff_annotation_route_library.dart';
 import 'package:flutter/material.dart';
-import 'example_route.dart';
-import 'example_routes.dart';
+import 'package:extended_tabs_example/extended_tabs_example_route.dart';
+import 'package:extended_tabs_example/extended_tabs_example_routes.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -42,10 +42,10 @@ class MyApp extends StatelessWidget {
 
 class CommonWidget extends StatelessWidget {
   const CommonWidget({
-    Key? key,
+    super.key,
     this.child,
     this.title,
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final String? title;

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class ListWidget extends StatelessWidget {
   const ListWidget(
     this.tabKey, {
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.vertical,
-  }) : super(key: key);
+  });
 
   final String tabKey;
   final Axis scrollDirection;

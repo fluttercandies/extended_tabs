@@ -15,7 +15,7 @@ import '../../widget/list.dart';
   },
 )
 class LinkDemo extends StatefulWidget {
-  const LinkDemo({Key? key}) : super(key: key);
+  const LinkDemo({super.key});
 
   @override
   State<LinkDemo> createState() => _LinkDemoState();

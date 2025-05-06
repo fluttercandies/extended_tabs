@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
   },
 )
 class MainAxisAlignmentDemo extends StatefulWidget {
-  const MainAxisAlignmentDemo({Key? key}) : super(key: key);
+  const MainAxisAlignmentDemo({super.key});
 
   @override
   State<MainAxisAlignmentDemo> createState() => _MainAxisAlignmentDemoState();
